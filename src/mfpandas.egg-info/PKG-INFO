@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: mfpandas
+Version: 0.0.1
+Summary: Parsing various z/OS structures into Panda dataframes.
+Home-page: https://github.com/wizardofzos/mfpandas
+Author: Wizard of z/OS
+Author-email: wizard@zdevops.com
+Project-URL: Bug Tracker, https://github.com/wizardofzos/mfpandas/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: wheel
+Requires-Dist: pandas>=1.5.2
+Requires-Dist: xlsxwriter>=3.1.0
+
+# mfPandas
+
+### placeholder repo

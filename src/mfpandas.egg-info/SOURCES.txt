@@ -1,0 +1,9 @@
+README.md
+setup.py
+src/mfpandas/__init__.py
+src/mfpandas.egg-info/PKG-INFO
+src/mfpandas.egg-info/SOURCES.txt
+src/mfpandas.egg-info/dependency_links.txt
+src/mfpandas.egg-info/requires.txt
+src/mfpandas.egg-info/top_level.txt
+src/mfpandas/IRRDBU00/__init__.py
