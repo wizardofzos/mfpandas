@@ -1,5 +1,7 @@
 import os 
 import pandas as pd 
+import datetime 
+
 
 class DCOLLECT:
 
@@ -57,6 +59,13 @@ class DCOLLECT:
             'DCDVOLSR': [],
             'DCDBKLNG': [],
             'DCDLRECL': [],
+            'DCDALLSP': [],
+            'DCDUSESP': [],
+            'DCDSCALL': [],    
+            'DCDNMBLK': [],
+            'DCDCREDT': [],
+            'DCDEXPDT': [],
+            'DCDLSTRF': [],
             }
                        
 
@@ -89,9 +98,29 @@ class DCOLLECT:
                     self._DRECS['DCDNOVVR'].append((DCDFLAG2 & 0b10000000) != 0)
                     self._DRECS['DCDINTCG'].append((DCDFLAG2 & 0b01000000) != 0)
                     self._DRECS['DCDINICF'].append((DCDFLAG2 & 0b00100000) != 0)
+                    if (DCDFLAG2 & 0b00001000) != 0:
+                        # 31 BIT SPACE ALLOCATED TO DATA SET IN KBs (1024). ONLY VALID WHEN DCDALLFG = ON.
+                        self._DRECS['DCDALLSP'].append((int(restrec[86:90].hex(),16)))
+                    else:
+                        self._DRECS['DCDALLSP'].append(0)
                     self._DRECS['DCDALLFG'].append((DCDFLAG2 & 0b00001000) != 0)
+                    if (DCDFLAG2 & 0b00000100) != 0:
+                        # 31 BIT SPACE USED BY DATA SET IN KBs (1024). ONLY VALID WHEN DCDUSEFG = ON.
+                        self._DRECS['DCDUSESP'].append((int(restrec[90:94].hex(),16)))
+                    else:
+                        self._DRECS['DCDUSESP'].append(0)
                     self._DRECS['DCDUSEFG'].append((DCDFLAG2 & 0b00000100) != 0)
+                    if (DCDFLAG2 & 0b00000010) != 0:
+                        #31 BIT SECONDARY ALLOCATION IN KBs (1024). ONLY VALID WHEN DCDSECFG = ON.
+                        self._DRECS['DCDSCALL'].append((int(restrec[94:98].hex(),16)))
+                    else:
+                         self._DRECS['DCDSCALL'].append(0)
                     self._DRECS['DCDSECFG'].append((DCDFLAG2 & 0b00000010) != 0)
+                    if (DCDFLAG2 & 0b00000001) != 0:
+                        #31 BIT NUMBER OF KILOBYTES (1024) THAT COULD BE ADDED TO THE USED SPACE IF THE BLOCK SIZE OR CI SIZE WERE OPTIMIZED. ONLY VALID WHEN DCDNMBFG = ON.
+                        self._DRECS['DCDNMBLK'].append((int(restrec[98:102].hex(),16)))
+                    else:
+                        self._DRECS['DCDNMBLK'].append(0)
                     self._DRECS['DCDNMBFG'].append((DCDFLAG2 & 0b00000001) != 0)
     
                     DCDFLAG3 = int(bin(restrec[69]),2)
@@ -127,6 +156,26 @@ class DCOLLECT:
                     self._DRECS['DCDVOLSR'].append(restrec[76:82].decode('cp500'))
                     self._DRECS['DCDBKLNG'].append(int(restrec[82:84].hex(),16))
                     self._DRECS['DCDLRECL'].append(int(restrec[84:86].hex(),16))
+
+                    # formats = yyyydddF
+                    createraw = restrec[102:106].hex()[0:7]
+                    crdte = datetime.datetime.strptime(createraw, '%Y%j').date()
+                    self._DRECS['DCDCREDT'].append(crdte)
+
+                    expraw = restrec[106:110].hex()[0:7]
+                    if expraw == '0000000':
+                        expdte = False
+                    else:
+                        expdte =  datetime.datetime.strptime(expraw, '%Y%j').date()
+                    self._DRECS['DCDEXPDT'].append(expdte)
+
+                    lrraw = restrec[110:114].hex()[0:7]
+                    if lrraw == '0000000':
+                        lrdte = False
+                    else:
+                        lrdte = datetime.datetime.strptime(lrraw, '%Y%j').date()
+                    self._DRECS['DCDLSTRF'].append(lrdte)
+
                     #print(DCDFLAG1, bin(DCDFLAG1), DCDRACFD, DCDSMSM,DCDTEMP,DCDPDSE,DCDGDS,DCDREBLK,DCDCHIND,DCDCKDSI )
                     #print(restrec.hex())
                  
