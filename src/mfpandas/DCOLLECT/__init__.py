@@ -66,6 +66,8 @@ class DCOLLECT:
             'DCDCREDT': [],
             'DCDEXPDT': [],
             'DCDLSTRF': [],
+            'DCDDSSER': [],
+            'DCDVOLSQ': [],
             }
                        
 
@@ -175,6 +177,10 @@ class DCOLLECT:
                     else:
                         lrdte = datetime.datetime.strptime(lrraw, '%Y%j').date()
                     self._DRECS['DCDLSTRF'].append(lrdte)
+
+                    self._DRECS['DCDDSSER'].append(restrec[114:120].decode('cp500'))
+
+                    self._DRECS['DCDVOLSQ'].append(restrec[120:122].decode('cp500'))
 
                     #print(DCDFLAG1, bin(DCDFLAG1), DCDRACFD, DCDSMSM,DCDTEMP,DCDPDSE,DCDGDS,DCDREBLK,DCDCHIND,DCDCKDSI )
                     #print(restrec.hex())
