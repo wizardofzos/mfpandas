@@ -2,10 +2,17 @@ import os
 import pandas as pd 
 import datetime 
 
+import threading
+import time
+
 
 class DCOLLECT:
 
- 
+    # Our states
+    STATE_BAD         = -1
+    STATE_INIT        =  0
+    STATE_PARSING     =  1
+    STATE_READY       =  2
 
     def __init__(self, dcollect=None):
         """Initialize our DCOLLECT class.
@@ -16,7 +23,12 @@ class DCOLLECT:
                                        this should be a BINARY received DCOLLECT file
         """
 
+
+
         self._dcolfile = dcollect
+
+        self._state = self.STATE_INIT 
+
         self._DRECS = {
             'DCDDSNAM': [],
             'DCDRACFD': [],
@@ -66,26 +78,44 @@ class DCOLLECT:
             'DCDCREDT': [],
             'DCDEXPDT': [],
             'DCDLSTRF': [],
-            'DCDDSSER': [],
-            'DCDVOLSQ': [],
+            'DCDATCL': [],
+            'DCDSTGCL': [],
+            'DCDMGTCL': [],
+            'DCDSTGRP': []
             }
-                       
+        self._VRECS = {
+            'DCVVOLSR': [],
+            'DCVPERCT': [],
+            'DCVFRESP': [],
+            'DCVALLOC': [],
+            'DCVVLCAP': [],
+            'DCVFRAGI': [],
+            'DCVLGEXT': [],
+            'DCVFREXT': [],
+            'DCVFDSCB': [],
+            'DCVFVIRS': [],
+            'DCVDVTYP': [],
+            'DCVDVNUM': [],
+            'DCVSGTCL': [],
+            'DCVDPTYP': [],
+
+        }                   
 
     def parse_t(self):
         with open(self._dcolfile, 'rb') as fid:
+            self._state = self.STATE_PARSING
             while True:
                 try:
                     DCULENG = int(fid.read(2).hex(),16)
                 except:
                     # we must have hit the end of the file :)
                     break
-                print('Have a record of',DCULENG,'bytes')
+                #print('Have a record of',DCULENG,'bytes')
                 restrec = fid.read(DCULENG-2)
                 DCURCTYP = restrec[2:4].decode('cp500').strip()
                 if DCURCTYP == 'D':
                     self._DRECS['DCDDSNAM'].append(restrec[22:66].decode('cp500').strip())
                     DCDERROR = bin(restrec[66])
-                    print(DCDERROR)
                     DCDFLAG1 = int(bin(restrec[67]),2)
                     self._DRECS['DCDRACFD'].append((DCDFLAG1 & 0b10000000) != 0)
                     self._DRECS['DCDSMSM'].append((DCDFLAG1 & 0b01000000) != 0)
@@ -178,24 +208,105 @@ class DCOLLECT:
                         lrdte = datetime.datetime.strptime(lrraw, '%Y%j').date()
                     self._DRECS['DCDLSTRF'].append(lrdte)
 
-                    self._DRECS['DCDDSSER'].append(restrec[114:120].decode('cp500'))
 
-                    self._DRECS['DCDVOLSQ'].append(restrec[120:122].decode('cp500'))
+
+                    dc = restrec[132:162].decode('cp500').strip()
+                    sc = restrec[164:194].decode('cp500').strip()
+                    mc = restrec[196:226].decode('cp500').strip()
+                    sg = restrec[228:258].decode('cp500').strip()
+
+                    if dc != '':
+                        self._DRECS['DCDATCL'].append(dc)
+                    else:
+                        self._DRECS['DCDATCL'].append('*NONE*')
+                    
+                    if sc != '':
+                        self._DRECS['DCDSTGCL'].append(sc)
+                    else:
+                        self._DRECS['DCDSTGCL'].append('*NONE*')
+                    
+                    if mc != '':
+                        self._DRECS['DCDMGTCL'].append(mc)
+                    else:
+                        self._DRECS['DCDMGTCL'].append('*NONE*')
+
+                    if sg != '':
+                        self._DRECS['DCDSTGRP'].append(sg)
+                    else:
+                        self._DRECS['DCDSTGRP'].append('*NONE*')
+
+
 
                     #print(DCDFLAG1, bin(DCDFLAG1), DCDRACFD, DCDSMSM,DCDTEMP,DCDPDSE,DCDGDS,DCDREBLK,DCDCHIND,DCDCKDSI )
                     #print(restrec.hex())
-                 
-                # DCURCTYP = l[4:6].decode('cp500').strip()
-                # DCUSYSID = l[8:12].decode('cp500')
-                # print(DCURCTYP)
-                # if DCURCTYP == 'D':
-                #     print(DCURCTYP,DCUSYSID)
-                #     DCDDSNAM = l[24:68].decode('cp500').strip()
-                #     print(DCDDSNAM)
+                elif DCURCTYP == 'V':
+                    self._VRECS['DCVVOLSR'].append(restrec[22:28].decode('cp500').strip())
+                    self._VRECS['DCVPERCT'].append(int(restrec[33:34].hex(),16))
+
+                    DCVCYLMG = int(bin(restrec[119]),2) & 0b10000000 == True
+                    fresp = int(restrec[34:38].hex(),16)
+                    alloc = int(restrec[38:42].hex(),16)
+                    vlcap = int(restrec[42:46].hex(),16)
+                    if DCVCYLMG:
+                        fresp *= 1024
+                        alloc *= 1024
+                        vlcap *= 1024
+                    self._VRECS['DCVFRESP'].append(fresp)
+                    self._VRECS['DCVALLOC'].append(alloc)
+                    self._VRECS['DCVVLCAP'].append(vlcap)
+
+                    self._VRECS['DCVFRAGI'].append(int(restrec[46:50].hex(),16))
+                    self._VRECS['DCVLGEXT'].append(int(restrec[50:54].hex(),16))
+                    self._VRECS['DCVFREXT'].append(int(restrec[54:58].hex(),16))
+                    self._VRECS['DCVFDSCB'].append(int(restrec[58:62].hex(),16))
+                    self._VRECS['DCVFVIRS'].append(int(restrec[62:66].hex(),16))
+
+                    self._VRECS['DCVDVTYP'].append(restrec[66:74].decode('cp500').strip())
+
+                    # maybe want 'int' value?
+                    self._VRECS['DCVDVNUM'].append(hex(int(restrec[74:76].hex(),16)))
+                    
+                    self._VRECS['DCVSGTCL'].append(restrec[80:110].decode('cp500').strip())
+                    self._VRECS['DCVDPTYP'].append(restrec[110:118].decode('cp500').strip())
+    
             self.drecs = pd.DataFrame.from_dict(self._DRECS)
+            del self._DRECS
+            self.vrecs = pd.DataFrame.from_dict(self._VRECS)
+            del self._VRECS
+            self._state = self.STATE_READY
 
-
-
+    def parse(self):
+        pt = threading.Thread(target=self.parse_t)
+        pt.start()
+        return True
+    
+    def parse_fancycli(self):
+        print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - parsing {self._dcolfile}')
+        self.parse()
+        while self._state < self.STATE_READY:
+            print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - {len(self._VRECS)} V-Records, {len(self._DRECS)} D-Records parsed', end='\r', flush=True)
+            time.sleep(0.5)
+        print('')
+        print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - Done. {len(self.vrecs)} V-Records, {len(self.drecs)} D-Records parsed')
+    @property
+    def status(self):
+        if self._state == self.STATE_READY:
+            return {'status': 'Ready', 'D-records parsed': len(self.drecs), 'V-records parsed': len(self.vrecs)}
+    @property
+    def datasets(self):
+        if self._state != self.STATE_READY:
+            print('no can do make nice error')
+        else:
+            return self.drecs
+    
+    @property
+    def volumes(self):
+        if self._state != self.STATE_READY:
+            print('error also here')
+        else:
+            return self.vrecs
+    
+   
             
 
 
