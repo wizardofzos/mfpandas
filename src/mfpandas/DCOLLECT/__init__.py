@@ -5,9 +5,48 @@ import datetime
 import threading
 import time
 
+class UsageError(Exception):
+    """Raised when a usage error occurs."""
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 class DCOLLECT:
 
+    """
+    This class contains code to parse a DCOLLECT dataset.
+
+    After parsing you get a Pandas DataFrame for every recordtype from the DCOLLECT data. 
+
+    To create a DCOLLECT dataset on z/OS amend and execute the following JCL::
+
+            //STEP00 EXEC  PGM=IDCAMS                       
+            //SYSPRINT DD  SYSOUT=*                        
+            //MCDS     DD  DSN=PATH.TO.MCDS,     
+            //             DISP=SHR                        
+            //BCDS     DD  DSN=PATH.TO.BCDS,       
+            //             DISP=SHR                        
+            //DCOUT    DD  DSN=YOUR.DCOLLECT.FILE,               
+            //             DISP=(NEW,CATLG),               
+            //             SPACE=(CYL,(10,1),RLSE),        
+            //             DCB=(RECFM=VB,BLKSIZE=27998),   
+            //             UNIT=SYSDA                      
+            //SYSIN    DD  *                               
+                DCOLLECT -                                
+                    OUTFILE(DCOUT) -                    
+                    MIGRATEDATA -                       
+                    CAPPLANDATA -                       
+                    BACKUPDATA -                        
+                    SMSDATA(SCDSNAME(ACTIVE)) -         
+                    VOLUME(*)         
+            
+    Then, transfer "YOUR.DCOLLECT.FILE" to your machine. Make sure this is a BINARY transfer
+   
+
+    Args:
+        dcollect (str): The full path to your DCOLLECT file. Defaults
+            to None.
+    """
     # Our states
     STATE_BAD         = -1
     STATE_INIT        =  0
@@ -15,16 +54,27 @@ class DCOLLECT:
     STATE_READY       =  2
 
     def __init__(self, dcollect=None):
-        """Initialize our DCOLLECT class.
+        """
+        Initialize the DCOLLECT class.
         Recordlayout from: https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure
 
-        Args:
-            dcollect (path, required): Path to dcollect file. Defaults to None.
-                                       this should be a BINARY received DCOLLECT file
+        Recordtypes supported: D (Datasets), V (Volumes).
+
+        :param dcollect: Full path to DCOLLECT file
+        :type dcollect: str
+        :raise UsageError: If no dcollect file specified.
+
+        Example usage::
+
+            >>> from mfpandas import DCOLLECT
+            >>> d = DCOLLECT(dcollect='/path/to/binary/dcollect/file')         
+
+
+
+
         """
-
-
-
+        if not dcollect:
+            raise UsageError("No DCOLLECT file specified.")
         self._dcolfile = dcollect
 
         self._state = self.STATE_INIT 
@@ -102,6 +152,17 @@ class DCOLLECT:
         }                   
 
     def parse_t(self):
+        """
+        Function to parse the dcollect file.
+        This function is called inside a thread via the parse() function.
+
+        Example usage::
+
+            >>> from mfpandas import DCOLLECT
+            >>> d = DCOLLECT(dcollect='/path/to/binary/dcollect/file') 
+            >>> d.parse_t()        
+
+        """
         with open(self._dcolfile, 'rb') as fid:
             self._state = self.STATE_PARSING
             while True:
@@ -276,11 +337,39 @@ class DCOLLECT:
             self._state = self.STATE_READY
 
     def parse(self):
+        """
+        Function to parse the dcollect file as a background thread.
+        This is a non-blocking function to parse the dcollect data.
+        Status of background parsing can be queried via the .status attribute.
+
+        Example usage::
+
+            >>> from mfpandas import DCOLLECT
+            >>> d = DCOLLECT(dcollect='/path/to/binary/dcollect/file') 
+            >>> d.parse()       
+
+        """        
         pt = threading.Thread(target=self.parse_t)
         pt.start()
         return True
     
     def parse_fancycli(self):
+        """
+        Function to parse the dcollect file as a background thread with some fancy graphics in the commandline.
+        This is a non-blocking function to parse the dcollect data.
+
+        Example usage::
+
+            >>> d = DCOLLECT('/path/to/binary/dcollect/file')
+            >>> d.parse_fancycli()
+            24-06-30 14:40:32 - parsing /path/to/binary/dcollect/file
+            24-06-30 14:40:32 - 14 V-Records, 52 D-Records parsed
+            24-06-30 14:40:32 - 29 V-Records, 125 D-Records parsed
+            24-06-30 14:40:33 - Done. 37 V-Records, 6704 D-Records parsed
+            >>> 
+
+
+        """            
         print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - parsing {self._dcolfile}')
         self.parse()
         while self._state < self.STATE_READY:
@@ -288,10 +377,12 @@ class DCOLLECT:
             time.sleep(0.5)
         print('')
         print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - Done. {len(self.vrecs)} V-Records, {len(self.drecs)} D-Records parsed')
+
     @property
     def status(self):
         if self._state == self.STATE_READY:
             return {'status': 'Ready', 'D-records parsed': len(self.drecs), 'V-records parsed': len(self.vrecs)}
+        
     @property
     def datasets(self):
         if self._state != self.STATE_READY:
