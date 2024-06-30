@@ -424,29 +424,6 @@ class DCOLLECT:
         Returns a Pandas Dataframe with all the parsed "D"-records. (datasets).
 
 
-
-        Example usage::
-
-            >>> d = DCOLLECT('/path/to/binary/dcollect/file')
-            >>> d.parse()
-            >>> d.status
-            {'status': 'Ready', 'records_seen': {'V': 37, 'D': 6704, 'A': 1392, 'DC': 12, 'SC': 12, 'MC': 2, 'SG': 11, 'VL': 471, 'BC': 1, 'AI': 1}, 'records_parsed': {'V': 37, 'D': 6704, 'A': 0, 'DC': 0, 'SC': 0, 'MC': 0, 'SG': 0, 'VL': 0, 'BC': 0, 'AI': 0}}
-            >>> d.datasets
-                                        DCDDSNAM  DCDRACFD  DCDSMSM  DCDTEMP  DCDPDSE  DCDGDS  DCDREBLK  DCDCHIND  DCDCKDSI  ...  DCDSCALL  DCDNMBLK    DCDCREDT    DCDEXPDT    DCDLSTRF  DCDATCL  DCDSTGCL  DCDMGTCL  DCDSTGRP
-            0                  SYS1.VVDS.VSARES1     False    False    False    False   False     False     False     False  ...       830         0  2021-11-01       False       False   *NONE*    *NONE*    *NONE*    *NONE*
-            1              CATALOG.SARES1.MASTER     False    False    False    False   False     False      True     False  ...       830         0  2021-11-01  1999-12-31  2022-02-12   *NONE*    *NONE*    *NONE*    *NONE*
-            2     CATALOG.SARES1.MASTER.CATINDEX     False    False    False    False   False     False     False     False  ...       830         0  2021-11-01  1999-12-31       False   *NONE*    *NONE*    *NONE*    *NONE*
-            3            SYS1.S0W1.STGINDEX.DATA     False    False    False    False   False     False      True     False  ...         0         0  2021-11-01  1999-12-31  2021-11-01   *NONE*    *NONE*    *NONE*    *NONE*
-            4           SYS1.S0W1.STGINDEX.INDEX     False    False    False    False   False     False     False     False  ...         0         0  2021-11-01  1999-12-31       False   *NONE*    *NONE*    *NONE*    *NONE*
-            ...                              ...       ...      ...      ...      ...     ...       ...       ...       ...  ...       ...       ...         ...         ...         ...      ...       ...       ...       ...
-            6699           ZDO.SMF.DUMP.G1160V00     False     True    False    False    True      True      True     False  ...     41502         0  2024-05-16       False  2024-05-16   *NONE*     SCZDO    *NONE*     SGZDO
-            6700           ZDO.SMF.DUMP.G1161V00     False     True    False    False    True      True      True     False  ...     41502         0  2024-05-16       False  2024-05-16   *NONE*     SCZDO    *NONE*     SGZDO
-            6701           ZDO.SMF.DUMP.G1174V00     False     True    False    False    True      True      True     False  ...     41502         0  2024-05-17       False  2024-05-17   *NONE*     SCZDO    *NONE*     SGZDO
-            6702           ZDO.SMF.DUMP.G1178V00     False     True    False    False    True      True      True     False  ...     41502         0  2024-05-17       False  2024-05-17   *NONE*     SCZDO    *NONE*     SGZDO
-            6703              SYS1.VTOCIX.ZDO004     False     True    False    False   False     False     False     False  ...         0        36  2023-04-18       False       False   *NONE*    *NONE*    *NONE*     SGZDO
-
-            [6704 rows x 52 columns]
-
         For an explanation of the fields go to : https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure
         """              
         if self._state != self.STATE_READY:
@@ -460,6 +437,24 @@ class DCOLLECT:
             print('error also here')
         else:
             return self.vrecs
+        
+
+    def datsets_on_volume(self, volser=None):
+        """
+        Returns a sorted list of all datasets on a volume.
+
+        
+        :param volume: Volume Serial 
+        :type volume: str
+        :raise UsageError: If unknown volume.
+        """        
+        volser_check = self.vrecs.loc[self.vrecs.DCVVOLSR==volser]
+        if len(volser_check) == 0:
+            raise UsageError(f"Volser {volser} not found")
+        datasets = list(self.drecs.loc[self.drecs.DCDVOLSR==volser]['DCDDSNAM'].values)
+        datasets.sort()
+        return datasets
+    
     
    
             

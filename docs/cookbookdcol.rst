@@ -16,7 +16,7 @@ For all examples here we're assuming you've already ran the following code::
 
 To find all datasets starting with 'SYS1' and the volulme they're on::
 
-    >>> sys1 = d.datasets.loc[d.datasets.DCDDSNAM.str.startswith('SYS1')][['DCDDSNAM', 'DCDVOLSR']]
+    >>> d.datasets.loc[d.datasets.DCDDSNAM.str.startswith('SYS1')][['DCDDSNAM', 'DCDVOLSR']]
                           DCDDSNAM DCDVOLSR
     0            SYS1.VVDS.VSARES1   SARES1
     3      SYS1.S0W1.STGINDEX.DATA   SARES1
@@ -29,4 +29,13 @@ To find all datasets starting with 'SYS1' and the volulme they're on::
     6458        SYS1.VTOCIX.ZDO003   ZDO003
     6459         SYS1.VVDS.VZDO004   ZDO004
     6703        SYS1.VTOCIX.ZDO004   ZDO004
+
+
+To find all datasets on a volume::
+
+    >>> d.datsets_on_volume(volser='A5DBAR')
+    ['SYS1.VTOCIX.A5DBAR', 'SYS1.VVDS.VA5DBAR']
+
+
+
 
