@@ -14,7 +14,7 @@ Contents
    :caption: Contents:
 
    Workign with DCOLLECT data <dcollect>
-   cookbook
+   DCOLLECT Example Usage <cookbookdcol>
 
 
    
