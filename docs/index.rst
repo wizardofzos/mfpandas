@@ -11,5 +11,4 @@ Contents
 .. toctree::
 
    Home <self>
-   usage
-   api
+   dcollect
