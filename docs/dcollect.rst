@@ -1,6 +1,7 @@
-API
+DCOLLECT
 ===
 
 .. autosummary::
    :toctree: generated
 
+DCOLLECT
