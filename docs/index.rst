@@ -13,6 +13,8 @@ Contents
    :maxdepth: 4
    :caption: Contents:
 
-   dcollect
+   Workign with DCOLLECT data <dcollect>
+   cookbook
+
 
    
