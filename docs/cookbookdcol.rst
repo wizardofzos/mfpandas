@@ -1,60 +1,32 @@
 Cookbook
 ========
 
-Here you'll see some examples of working with DCOLL
-Working with D-records
+Here you'll see some examples of working with the DCOLLECT class.
 
-``xmi.open_file()`` to open an XMI, AWS, or HET file::
+For all examples here we're assuming you've already ran the following code::
 
-    import xmi
-    xmi_obj = xmi.open_file("/path/to/file.xmi")
-    het_obj = xmi.open_file("/path/to/file.het")
-    aws_obj = xmi.open_file("/path/to/file.aws")
+    from mfpandas import DCOLLECT
+    import time
 
-To list all datasets and dataset members::
+    d = DCOLLECT('/path/to/dcolfile')
+    d.parse()
+    while d.status['status'] != 'Ready':
+        time.sleep(1)
 
-    for f in het_obj.get_files():
-        if het_obj.is_pds(f):
-            for m in het_obj.get_members(f):
-                print("{}({})".format(f, m))
-        else:
-            print(f)
 
-Print JSON metatdata::
+To find all datasets starting with 'SYS1' and the volulme they're on::
 
-    print(xmi_obj.get_json())
-    print(het_obj.get_json(text=True)) # Adds plaintext files to json output
-    print(aws_obj.get_json(indent=6)) # Increases the json indent
+    >>> sys1 = d.datasets.loc[d.datasets.DCDDSNAM.str.startswith('SYS1')][['DCDDSNAM', 'DCDVOLSR']]
+                          DCDDSNAM DCDVOLSR
+    0            SYS1.VVDS.VSARES1   SARES1
+    3      SYS1.S0W1.STGINDEX.DATA   SARES1
+    4     SYS1.S0W1.STGINDEX.INDEX   SARES1
+    5          SYS1.S0W1.MAN1.DATA   SARES1
+    6          SYS1.S0W1.MAN2.DATA   SARES1
+    ...                        ...      ...
+    6107        SYS1.VTOCIX.ZDO002   ZDO002
+    6108         SYS1.VVDS.VZDO003   ZDO003
+    6458        SYS1.VTOCIX.ZDO003   ZDO003
+    6459         SYS1.VVDS.VZDO004   ZDO004
+    6703        SYS1.VTOCIX.ZDO004   ZDO004
 
-Silently extract all files/folders to ``/tmp/xmi_files/``::
-
-    aws_obj.set_output_folder("/tmp/xmi_files/")
-    aws_obj.set_quiet(True)
-    aws_obj.extract_all()
-
-Print detailed file information::
-
-    xmi_obj.print_details()
-    xmi_obj.print_xmit()  # Same output as previous, print_xmit() is an alias to print_details()
-    het_obj.print_tape()  # print_tape() is an alias to print_details()
-    aws_obj.print_tape(human=True)  # Converts size to human readable
-
-Print message::
-
-    if xmi_obj.has_message():
-        print(xmi_obj.get_message())
-
-or just::
-
-    print(xmi_obj.get_message())  # Prints 'None' if no message
-
-If you you're having problems with the library or want to see whats happening
-behind the scenes you can enable debugging::
-
-    import logging
-    import xmi
-
-    xmi_obj = xmi.XMIT(filename="/path/to/file.xmi",loglevel=logging.DEBUG)
-    xmi_obj.open()
-
-As you can see, using this library is fairly easy.
