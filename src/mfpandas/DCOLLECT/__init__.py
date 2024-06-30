@@ -53,6 +53,10 @@ class DCOLLECT:
     STATE_PARSING     =  1
     STATE_READY       =  2
 
+    # Counters
+    records_seen = {}
+    records_parsed = {}
+
     def __init__(self, dcollect=None):
         """
         Initialize the DCOLLECT class.
@@ -174,6 +178,11 @@ class DCOLLECT:
                 #print('Have a record of',DCULENG,'bytes')
                 restrec = fid.read(DCULENG-2)
                 DCURCTYP = restrec[2:4].decode('cp500').strip()
+                if DCURCTYP in self.records_seen:
+                    self.records_seen[DCURCTYP] += 1
+                else:
+                    self.records_seen[DCURCTYP] = 1
+                    self.records_parsed[DCURCTYP] = 0
                 if DCURCTYP == 'D':
                     self._DRECS['DCDDSNAM'].append(restrec[22:66].decode('cp500').strip())
                     DCDERROR = bin(restrec[66])
@@ -296,10 +305,8 @@ class DCOLLECT:
                     else:
                         self._DRECS['DCDSTGRP'].append('*NONE*')
 
-
-
-                    #print(DCDFLAG1, bin(DCDFLAG1), DCDRACFD, DCDSMSM,DCDTEMP,DCDPDSE,DCDGDS,DCDREBLK,DCDCHIND,DCDCKDSI )
-                    #print(restrec.hex())
+                    
+                    self.records_parsed['D'] += 1
                 elif DCURCTYP == 'V':
                     self._VRECS['DCVVOLSR'].append(restrec[22:28].decode('cp500').strip())
                     self._VRECS['DCVPERCT'].append(int(restrec[33:34].hex(),16))
@@ -329,7 +336,9 @@ class DCOLLECT:
                     
                     self._VRECS['DCVSGTCL'].append(restrec[80:110].decode('cp500').strip())
                     self._VRECS['DCVDPTYP'].append(restrec[110:118].decode('cp500').strip())
-    
+
+                    self.records_parsed['V'] += 1
+
             self.drecs = pd.DataFrame.from_dict(self._DRECS)
             del self._DRECS
             self.vrecs = pd.DataFrame.from_dict(self._VRECS)
@@ -362,10 +371,19 @@ class DCOLLECT:
 
             >>> d = DCOLLECT('/path/to/binary/dcollect/file')
             >>> d.parse_fancycli()
-            24-06-30 14:40:32 - parsing /path/to/binary/dcollect/file
-            24-06-30 14:40:32 - 14 V-Records, 52 D-Records parsed
-            24-06-30 14:40:32 - 29 V-Records, 125 D-Records parsed
-            24-06-30 14:40:33 - Done. 37 V-Records, 6704 D-Records parsed
+            24-06-30 15:07:07 - parsing /path/to/binary/dcollect/file
+            24-06-30 15:07:07 - Still Parsing your input
+            24-06-30 15:07:08 - Done.
+            24-06-30 15:07:08   - 37 V-records seen, 37 parsed
+            24-06-30 15:07:08   - 6704 D-records seen, 6704 parsed
+            24-06-30 15:07:08   - 1392 A-records seen, 0 parsed
+            24-06-30 15:07:08   - 12 DC-records seen, 0 parsed
+            24-06-30 15:07:08   - 12 SC-records seen, 0 parsed
+            24-06-30 15:07:08   - 2 MC-records seen, 0 parsed
+            24-06-30 15:07:08   - 11 SG-records seen, 0 parsed
+            24-06-30 15:07:08   - 471 VL-records seen, 0 parsed
+            24-06-30 15:07:08   - 1 BC-records seen, 0 parsed
+            24-06-30 15:07:08   - 1 AI-records seen, 0 parsed
             >>> 
 
 
@@ -373,15 +391,32 @@ class DCOLLECT:
         print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - parsing {self._dcolfile}')
         self.parse()
         while self._state < self.STATE_READY:
-            print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - {len(self._VRECS)} V-Records, {len(self._DRECS)} D-Records parsed', end='\r', flush=True)
+            print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - {self.status["status"]}', end='\r', flush=True)
             time.sleep(0.5)
         print('')
-        print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - Done. {len(self.vrecs)} V-Records, {len(self.drecs)} D-Records parsed')
+        print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - Done.')
+        for t in self.records_parsed:
+            print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")}   - {self.records_seen[t]} {t}-records seen, {self.records_parsed[t]} parsed')
 
     @property
     def status(self):
+        """
+        Retrieves status of our background task.
+
+        Example usage::
+
+            >>> d = DCOLLECT('/path/to/binary/dcollect/file')
+            >>> d.parse()
+            >>> d.status
+            {'status': 'Ready', 'records_seen': {'V': 37, 'D': 6704, 'A': 1392, 'DC': 12, 'SC': 12, 'MC': 2, 'SG': 11, 'VL': 471, 'BC': 1, 'AI': 1}, 'records_parsed': {'V': 37, 'D': 6704, 'A': 0, 'DC': 0, 'SC': 0, 'MC': 0, 'SG': 0, 'VL': 0, 'BC': 0, 'AI': 0}}
+            >>> 
+
+
+        """       
         if self._state == self.STATE_READY:
-            return {'status': 'Ready', 'D-records parsed': len(self.drecs), 'V-records parsed': len(self.vrecs)}
+            return {'status': 'Ready', 'records_seen': self.records_seen, 'records_parsed': self.records_parsed}
+        else:
+            return {'status': "Still Parsing your input", 'records_seen': self.records_seen, 'records_parsed': self.records_parsed}
         
     @property
     def datasets(self):
