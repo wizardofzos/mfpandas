@@ -1,7 +1,7 @@
 DCOLLECT
-===
+========
 
-.. autosummary::
-   :toctree: generated
-
-DCOLLECT
+.. autoclass:: mfpandas.DCOLLECT
+    :members:
+    :private-members:
+    :special-members:
