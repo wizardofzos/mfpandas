@@ -1,3 +1,0 @@
-# mfPandas
-
-### placeholder repo

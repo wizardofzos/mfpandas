@@ -1,16 +1,16 @@
 import setuptools
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.rst", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mfpandas",
-    version="0.0.1",
+    version="0.0.3",
     author="Wizard of z/OS",
     author_email="wizard@zdevops.com",
     description="Parsing various z/OS structures into Panda dataframes.",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type="text/x-rst",
     url="https://github.com/wizardofzos/mfpandas",
     project_urls={
         "Bug Tracker": "https://github.com/wizardofzos/mfpandas/issues",
