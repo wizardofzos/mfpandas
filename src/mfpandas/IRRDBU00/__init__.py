@@ -286,7 +286,7 @@ class IRRDBU00:
     
     # load irrdbu00 field definitions, save offsets in _recordtype_info
     # strictly speaking only needed for parse() function, but also not limited to one instance.
-    with importlib.resources.open_text("mfpandas", "offsets.json") as file:
+    with importlib.resources.open_text("mfpandas.IRRDBU00", "offsets.json") as file:
         _offsets = json.load(file)
     for offset in _offsets:
         rtype = _offsets[offset]['record-type']
