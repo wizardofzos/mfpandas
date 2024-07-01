@@ -1,5 +1,5 @@
-Working with DCOLLECT data
-==========================
+The DCOLLECT CLASS
+==================
 
 The DCOLLECT class is made to work with DCOLLECT data.
 
