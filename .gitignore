@@ -1,1 +1,3 @@
-src/mfpandas.egg-info
+docs/_build/*
+src/mfpandas/__pycache__/*
+src/mfpandas/mfpandas.egg-info/*
