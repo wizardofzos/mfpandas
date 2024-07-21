@@ -25,7 +25,7 @@ This means the resulting Pandas DataFrame is available, after parsing as ``.grou
 
 .. literalinclude:: ../src/mfpandas/irrdbu00.py
    :language: python
-   :lines: 174-279
+   :lines: 65-163
    :linenos:
 
 
