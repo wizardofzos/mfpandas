@@ -34,6 +34,10 @@ It will have all the fields as documented at https://www.ibm.com/docs/en/zos/3.1
 
 Here's the output of the ``.groups.info()`` call on a fully parsed unload::
 
+    >>> from mfpandas import IRRDBU00
+    >>> r = IRRDBU00(irrdbu00='/path/to/unload')
+    >>> r.parse()
+    True
     >>> r.groups.info()
     <class 'pandas.core.frame.DataFrame'>
     Index: 11332 entries, $AAAA to Z$FGRP01
