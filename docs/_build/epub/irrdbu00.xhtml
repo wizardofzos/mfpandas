@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Working with IRRDBU00 data</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8e8a900e" />
+    <link rel="stylesheet" type="text/css" href="_static/epub.css?v=0a53256b" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="working-with-irrdbu00-data">
+<h1>Working with IRRDBU00 data</h1>
+<p>The <a class="reference internal" href="irrdbu00class.xhtml"><span class="doc">IRRDBU00 Class</span></a> is made to work with IRRDBU00 data.
+It will give you methods to get:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><em>standard dataframes</em>: strict conversion of IRRDBU00 recordtypes to Pandas DataFrames</p></li>
+<li><p><em>augmented dataframes</em>: like standard dataframes but with extra columns added</p></li>
+<li><p><em>specialised dataframes</em>: preselected queries we all want to do on our RACF</p></li>
+<li><p><em>handy add-ons</em>: extra query features, data structures, xlsx-generation etc.</p></li>
+</ul>
+</div></blockquote>
+<section id="standard-dataframes">
+<h2>Standard DataFrames</h2>
+<p>Below you will see one of the core pieces of code of the parsing stucture.
+The ‘key’ of the dictionary (0100, 0101, etc.) is the recordtype from the IRRDBU00 unload as described in <a class="reference external" href="https://www.ibm.com/docs/en/zos/3.1.0?topic=records-irrdbu00-record-types">https://www.ibm.com/docs/en/zos/3.1.0?topic=records-irrdbu00-record-types</a>.</p>
+<p>If, for instance, we’re looking at the “Group Basic Data” in recordtype <code class="docutils literal notranslate"><span class="pre">0100</span></code> you’ll see an ‘interal name’ of <code class="docutils literal notranslate"><span class="pre">GPBD</span></code> and a ‘dataframe name’ of <code class="docutils literal notranslate"><span class="pre">_groups</span></code>.
+This means the resulting Pandas DataFrame is available, after parsing as <code class="docutils literal notranslate"><span class="pre">.groups</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span>    <span class="n">_recordtype_info</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">2</span>    <span class="s1">&#39;0100&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;GPBD&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span><span class="s1">&#39;_groups&#39;</span><span class="p">},</span>
+<span class="linenos">3</span>    <span class="s1">&#39;0101&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;GPSGRP&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span><span class="s1">&#39;_subgroups&#39;</span><span class="p">},</span>
+<span class="linenos">4</span>    <span class="s1">&#39;0102&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;GPMEM&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span><span class="s1">&#39;_connects&#39;</span><span class="p">},</span>
+<span class="linenos">5</span>    <span class="s1">&#39;05K0&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;GRIDTP&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span><span class="s1">&#39;_generalIDTFPARMS&#39;</span><span class="p">},</span>
+<span class="linenos">6</span>    <span class="s1">&#39;05L0&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;GRJES&#39;</span><span class="p">,</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span><span class="s1">&#39;_generalJES&#39;</span><span class="p">}</span>
+<span class="linenos">7</span>    <span class="p">}</span>
+</pre></div>
+</div>
+<p>The Standard DataFrames look ‘just like the documentation’. For example, the ‘0100’-records are parsed then available via the <code class="docutils literal notranslate"><span class="pre">.groups</span></code> method of the IRRDBU00 class.
+It will have all the fields as documented at <a class="reference external" href="https://www.ibm.com/docs/en/zos/3.1.0?topic=records-record-formats-produced-by-database-unload-utility#idg63092__title__1">https://www.ibm.com/docs/en/zos/3.1.0?topic=records-record-formats-produced-by-database-unload-utility#idg63092__title__1</a></p>
+<p>Here’s the output of the <code class="docutils literal notranslate"><span class="pre">.groups.info()</span></code> call on a fully parsed unload:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mfpandas</span> <span class="kn">import</span> <span class="n">IRRDBU00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">IRRDBU00</span><span class="p">(</span><span class="n">irrdbu00</span><span class="o">=</span><span class="s1">&#39;/path/to/unload&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">groups</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+<span class="go">&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;</span>
+<span class="go">Index: 11332 entries, $AAAA to Z$FGRP01</span>
+<span class="go">Data columns (total 10 columns):</span>
+<span class="go">#   Column             Non-Null Count  Dtype</span>
+<span class="go">---  ------             --------------  -----</span>
+<span class="go">0   GPBD_RECORD_TYPE   23991 non-null  object</span>
+<span class="go">1   GPBD_NAME          23991 non-null  object</span>
+<span class="go">2   GPBD_SUPGRP_ID     23991 non-null  object</span>
+<span class="go">3   GPBD_CREATE_DATE   23991 non-null  object</span>
+<span class="go">4   GPBD_OWNER_ID      23991 non-null  object</span>
+<span class="go">5   GPBD_UACC          23991 non-null  object</span>
+<span class="go">6   GPBD_NOTERMUACC    23991 non-null  object</span>
+<span class="go">7   GPBD_INSTALL_DATA  23991 non-null  object</span>
+<span class="go">8   GPBD_MODEL         23991 non-null  object</span>
+<span class="go">9   GPBD_UNIVERSAL     23991 non-null  object</span>
+</pre></div>
+</div>
+</section>
+<section id="augmented-dataframes">
+<h2>Augmented DataFrames</h2>
+</section>
+<section id="specialised-dataframes">
+<h2>Specialised DataFrames</h2>
+</section>
+<section id="handy-add-ons">
+<h2>Handy add-ons</h2>
+</section>
+<section id="examples">
+<h2>Examples</h2>
+<section id="you-need-to-get-a-report-of-all-the-users-on-the-system-that-are-still-don-t-have-a-passphrase">
+<h3>You need to get a report of all the users on the system that are still don’t have a passphrase.</h3>
+<p>First you create an <code class="docutils literal notranslate"><span class="pre">IRRDBU00</span></code>-unload via the following JCL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">UNLOAD</span>   <span class="n">EXEC</span> <span class="n">PGM</span><span class="o">=</span><span class="n">IRRDBU00</span><span class="p">,</span><span class="n">PARM</span><span class="o">=</span><span class="n">NOLOCKINPUT</span>
+<span class="o">//</span><span class="n">SYSPRINT</span> <span class="n">DD</span>   <span class="n">SYSOUT</span><span class="o">=*</span>
+<span class="o">//</span><span class="n">INDD1</span>    <span class="n">DD</span>   <span class="n">DISP</span><span class="o">=</span><span class="n">SHR</span><span class="p">,</span><span class="n">DSN</span><span class="o">=</span><span class="n">SYS1</span><span class="o">.</span><span class="n">BACKUP</span>
+<span class="o">//</span><span class="n">OUTDD</span>    <span class="n">DD</span>   <span class="n">DSN</span><span class="o">=</span><span class="n">HLQ</span><span class="o">.</span><span class="n">TO</span><span class="o">.</span><span class="n">UNLOAD</span><span class="o">.</span><span class="n">FILE</span><span class="p">,</span>
+<span class="o">//</span>              <span class="n">DISP</span><span class="o">=</span><span class="p">(,</span><span class="n">CATLG</span><span class="p">,</span><span class="n">DELETE</span><span class="p">),</span>
+<span class="o">//</span>              <span class="n">SPACE</span><span class="o">=</span><span class="p">(</span><span class="n">CYL</span><span class="p">,(</span><span class="mi">100</span><span class="p">,</span><span class="mi">150</span><span class="p">)),</span>
+<span class="o">//</span>              <span class="n">DCB</span><span class="o">=</span><span class="p">(</span><span class="n">RECFM</span><span class="o">=</span><span class="n">VB</span><span class="p">,</span><span class="n">LRECL</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span><span class="n">BLKSIZE</span><span class="o">=</span><span class="mi">20480</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After submitting the above JCL, you transfer the <code class="docutils literal notranslate"><span class="pre">HLQ.TO.UNLOAD.FILE</span></code> (ASCII) to your Linux box (currently mfpandas does not run on z/OS, due to Pandas not working nicely on z/OS yet…)</p>
+<p>Once the file is receieved you create a folder for your work and install the mfpandas library like below:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>henri@linux-box:~/$ mkdir my_cool_project
+henri@linux-box:~/$ cd my_cool_project
+henri@linux-box:~/my_cool_project$ python -m venv virtualenv
+(virtualenv) henri@linux-box:~/my_cool_project$ pip install mfpandas
+(virtualenv) henri@linux-box:~/my_cool_project$ cp ~/Downloads/HLQ.TO.UNLOAD.FILE irrdbu00
+</pre></div>
+</div>
+<p>Now, just for a quick and dirty result you enter an interactive python terminal and:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mfpandas</span> <span class="kn">import</span> <span class="n">IRRDBU00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">racf</span> <span class="o">=</span> <span class="n">IRRDBU00</span><span class="p">(</span><span class="n">irrdbu00</span><span class="o">=</span><span class="s1">&#39;/home/henri/irrdbu00&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">racf</span><span class="o">.</span><span class="n">parse_fancycli</span><span class="p">(</span><span class="n">recordtypes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;0200&#39;</span><span class="p">])</span>
+<span class="go">24-07-01 20:35:15 - parsing /home/henri/irrdbu00</span>
+<span class="go">24-07-01 20:35:23 - progress: ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉                      (26.98%)</span>
+</pre></div>
+</div>
+<p>After parsing is finished can start interactively coding the solution:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">24</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">01</span> <span class="mi">20</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">51</span> <span class="o">-</span> <span class="n">total</span> <span class="n">parse</span> <span class="n">time</span><span class="p">:</span> <span class="mf">47.209619</span> <span class="n">seconds</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">users_without_phrase</span> <span class="o">=</span> <span class="n">racf</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">racf</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">USBD_PHR_ALG</span><span class="o">==</span><span class="s1">&#39;NOPHRASE&#39;</span><span class="p">]</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users_without_phrase</span><span class="p">[</span><span class="s1">&#39;USBD_NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+<span class="o">...</span>   <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;User </span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s1"> is still not using a passphrase&#39;</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="n">User</span> <span class="n">IBMUSER</span> <span class="ow">is</span> <span class="n">still</span> <span class="ow">not</span> <span class="n">using</span> <span class="n">a</span> <span class="n">passphrase</span>
+<span class="n">User</span> <span class="n">TEST001</span> <span class="ow">is</span> <span class="n">still</span> <span class="ow">not</span> <span class="n">using</span> <span class="n">a</span> <span class="n">passphrase</span>
+<span class="n">User</span> <span class="n">TEST002</span> <span class="ow">is</span> <span class="n">still</span> <span class="ow">not</span> <span class="n">using</span> <span class="n">a</span> <span class="n">passphrase</span>
+<span class="o">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+<p>As you can see above, with some relatively easy to learn ‘Pandas Queries’ (<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.loc.html">https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.loc.html</a>), using the standard IBM labelnames
+you can quickly het some results. It’s a small feat to then extend that code with some ‘RACF COMMAND GENERATION’ to
+give all these users a new ‘one time’ passphrase they must change after first logon with said passphrase:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cmds</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">user</span> <span class="ow">in</span> <span class="n">users_without_phrase</span><span class="p">[</span><span class="s1">&#39;USBD_NAME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;User </span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s1"> is still not using a passphrase&#39;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ALU </span><span class="si">{</span><span class="n">user</span><span class="si">}</span><span class="s1"> PRASE(&#39;</span><span class="n">mfpandas_gave_me_a_passphrase</span><span class="s1">&#39;))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/givethemprases.txt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">... </span>  <span class="n">f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>After which you can easily stick that on the end of an <code class="docutils literal notranslate"><span class="pre">IKJEFT01</span></code> to execute the commands.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

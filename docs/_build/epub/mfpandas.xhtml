@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>The mfpandas library</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8e8a900e" />
+    <link rel="stylesheet" type="text/css" href="_static/epub.css?v=0a53256b" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <section id="the-mfpandas-library">
+<h1>The mfpandas library</h1>
+<section id="why">
+<h2>Why</h2>
+<p>The z/OS operating system exports a variety of different data into datasets.
+Traditionally these would be used inside a <code class="docutils literal notranslate"><span class="pre">DFSort</span></code> or <code class="docutils literal notranslate"><span class="pre">ICETOOL</span></code> job to query this information and generate insightful reports based on this data.</p>
+<p>With mfpandas you can do the same, but with the power of python.</p>
+<p>The various mfpandas classes will give you the tools to convert these ‘tradtional’ Mainframe Datasets into Pandas DataFrames.</p>
+<p>This library is not intended to cover all reporting requirements (as that would be crazy and too complex to suit everybodies needs) instead
+it focusses on generating Pandas Datasets that contain all the information from the Mainframe Datasets so you can build your own tools
+on top of it.</p>
+<p>Currently available classes</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="irrdbu00class.xhtml"><span class="doc">IRRDBU00</span></a></p></li>
+<li><p><a class="reference internal" href="dcollectclass.xhtml"><span class="doc">DCOLLECT</span></a></p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="history">
+<h2>History</h2>
+<p>Initially, there was only “pyracf,” a Python parser designed for IRRDBU00 unloads. You can find that outdated repository at <a class="reference external" href="https://github.com/wizardofzos/pyracf">https://github.com/wizardofzos/pyracf</a>. However, I discovered another project named “pyracf” (<a class="reference external" href="https://github.com/ambitus/pyracf">https://github.com/ambitus/pyracf</a>) that now cannot use the name on pypi.org. We discussed merging the two pyracf projects, but this was unsuccessful primarily because their pyracf was intended to run on z/OS, while mine was not.</p>
+<p>Driven by the need for more Pythonic ways to handle “Mainframe Things,” I decided to pivot to creating mfpandas, a dedicated framework for parsing Mainframe Data into Pandas DataFrames. This shift offers several benefits: it allows for more mainframe parsing capabilities within a single pip install and frees up the pyracf name for ambitus’s pyracf project.
+You’ll notice some of the orgininal ‘pyracf methods’ are missing from the new IRRDBU00-class. This is because they need a good rewrite due to the new setup of the class (mainly documentation related).</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

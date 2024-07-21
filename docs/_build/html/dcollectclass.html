@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The DCOLLECT CLASS &mdash; mfpandas 0.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=c1dcd045"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Cookbook DCOLLECT" href="cookbookdcol.html" />
+    <link rel="prev" title="Working with DCOLLECT data" href="dcollect.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            mfpandas
+          </a>
+              <div class="version">
+                0.0.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="mfpandas.html">The mfpandas library</a></li>
+<li class="toctree-l1"><a class="reference internal" href="irrdbu00.html">Working with IRRDBU00 data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="irrdbu00class.html">The IRDDBU00 Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cookbookirr.html">IRRDBU00 Cookbook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dcollect.html">Working with DCOLLECT data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The DCOLLECT Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mfpandas.DCOLLECT"><code class="docutils literal notranslate"><span class="pre">DCOLLECT</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.parse_t"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.parse_t()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.parse"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.parse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.parse_fancycli"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.parse_fancycli()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.save_pickles"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.save_pickles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.status"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.status</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.datasets"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.datasets</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mfpandas.DCOLLECT.datsets_on_volume"><code class="docutils literal notranslate"><span class="pre">DCOLLECT.datsets_on_volume()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cookbookdcol.html">DCOLLECT Cookbook</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mfpandas</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">The DCOLLECT CLASS</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dcollectclass.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-dcollect-class">
+<h1>The DCOLLECT CLASS<a class="headerlink" href="#the-dcollect-class" title="Permalink to this heading">¶</a></h1>
+<p>The DCOLLECT class is made to work with DCOLLECT data.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mfpandas.</span></span><span class="sig-name descname"><span class="pre">DCOLLECT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dcollect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class contains code to parse a DCOLLECT dataset.</p>
+<p>After parsing you get a Pandas DataFrame for every recordtype from the DCOLLECT data.</p>
+<p>To create a DCOLLECT dataset on z/OS amend and execute the following JCL:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">//</span><span class="n">STEP00</span> <span class="n">EXEC</span>  <span class="n">PGM</span><span class="o">=</span><span class="n">IDCAMS</span>
+<span class="o">//</span><span class="n">SYSPRINT</span> <span class="n">DD</span>  <span class="n">SYSOUT</span><span class="o">=*</span>
+<span class="o">//</span><span class="n">MCDS</span>     <span class="n">DD</span>  <span class="n">DSN</span><span class="o">=</span><span class="n">PATH</span><span class="o">.</span><span class="n">TO</span><span class="o">.</span><span class="n">MCDS</span><span class="p">,</span>
+<span class="o">//</span>             <span class="n">DISP</span><span class="o">=</span><span class="n">SHR</span>
+<span class="o">//</span><span class="n">BCDS</span>     <span class="n">DD</span>  <span class="n">DSN</span><span class="o">=</span><span class="n">PATH</span><span class="o">.</span><span class="n">TO</span><span class="o">.</span><span class="n">BCDS</span><span class="p">,</span>
+<span class="o">//</span>             <span class="n">DISP</span><span class="o">=</span><span class="n">SHR</span>
+<span class="o">//</span><span class="n">DCOUT</span>    <span class="n">DD</span>  <span class="n">DSN</span><span class="o">=</span><span class="n">YOUR</span><span class="o">.</span><span class="n">DCOLLECT</span><span class="o">.</span><span class="n">FILE</span><span class="p">,</span>
+<span class="o">//</span>             <span class="n">DISP</span><span class="o">=</span><span class="p">(</span><span class="n">NEW</span><span class="p">,</span><span class="n">CATLG</span><span class="p">),</span>
+<span class="o">//</span>             <span class="n">SPACE</span><span class="o">=</span><span class="p">(</span><span class="n">CYL</span><span class="p">,(</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">RLSE</span><span class="p">),</span>
+<span class="o">//</span>             <span class="n">DCB</span><span class="o">=</span><span class="p">(</span><span class="n">RECFM</span><span class="o">=</span><span class="n">VB</span><span class="p">,</span><span class="n">BLKSIZE</span><span class="o">=</span><span class="mi">27998</span><span class="p">),</span>
+<span class="o">//</span>             <span class="n">UNIT</span><span class="o">=</span><span class="n">SYSDA</span>
+<span class="o">//</span><span class="n">SYSIN</span>    <span class="n">DD</span>  <span class="o">*</span>
+    <span class="n">DCOLLECT</span> <span class="o">-</span>
+        <span class="n">OUTFILE</span><span class="p">(</span><span class="n">DCOUT</span><span class="p">)</span> <span class="o">-</span>
+        <span class="n">MIGRATEDATA</span> <span class="o">-</span>
+        <span class="n">CAPPLANDATA</span> <span class="o">-</span>
+        <span class="n">BACKUPDATA</span> <span class="o">-</span>
+        <span class="n">SMSDATA</span><span class="p">(</span><span class="n">SCDSNAME</span><span class="p">(</span><span class="n">ACTIVE</span><span class="p">))</span> <span class="o">-</span>
+        <span class="n">VOLUME</span><span class="p">(</span><span class="o">*</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then, transfer “YOUR.DCOLLECT.FILE” to your machine. Make sure this is a BINARY transfer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dcollect</strong> (<em>str</em>) – The full path to your DCOLLECT file. Defaults
+to None.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.parse_t">
+<span class="sig-name descname"><span class="pre">parse_t</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT.parse_t" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to parse the dcollect file.
+This function is called inside a thread via the parse() function.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mfpandas</span> <span class="kn">import</span> <span class="n">DCOLLECT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">DCOLLECT</span><span class="p">(</span><span class="n">dcollect</span><span class="o">=</span><span class="s1">&#39;/path/to/binary/dcollect/file&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">parse_t</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to parse the dcollect file as a background thread.
+This is a non-blocking function to parse the dcollect data.
+Status of background parsing can be queried via the .status attribute.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mfpandas</span> <span class="kn">import</span> <span class="n">DCOLLECT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">DCOLLECT</span><span class="p">(</span><span class="n">dcollect</span><span class="o">=</span><span class="s1">&#39;/path/to/binary/dcollect/file&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.parse_fancycli">
+<span class="sig-name descname"><span class="pre">parse_fancycli</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT.parse_fancycli" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to parse the dcollect file as a background thread with some fancy graphics in the commandline.
+This is a non-blocking function to parse the dcollect data.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">DCOLLECT</span><span class="p">(</span><span class="s1">&#39;/path/to/binary/dcollect/file&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">parse_fancycli</span><span class="p">()</span>
+<span class="go">24-06-30 15:07:07 - parsing /path/to/binary/dcollect/file</span>
+<span class="go">24-06-30 15:07:07 - Still Parsing your input</span>
+<span class="go">24-06-30 15:07:08 - Done.</span>
+<span class="go">24-06-30 15:07:08   - 37 V-records seen, 37 parsed</span>
+<span class="go">24-06-30 15:07:08   - 6704 D-records seen, 6704 parsed</span>
+<span class="go">24-06-30 15:07:08   - 1392 A-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 12 DC-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 12 SC-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 2 MC-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 11 SG-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 471 VL-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 1 BC-records seen, 0 parsed</span>
+<span class="go">24-06-30 15:07:08   - 1 AI-records seen, 0 parsed</span>
+<span class="gp">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.save_pickles">
+<span class="sig-name descname"><span class="pre">save_pickles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT.save_pickles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the generated DataFrames into pickles so you can quickly
+use them again in another run.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>path</em>) – Path to where the pickles will be saved</p></li>
+<li><p><strong>prefix</strong> (<em>str</em>) – Prefix for the pickle files (optional)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>UsageError</strong> – If not done parsing yet</p></li>
+<li><p><strong>UsageError</strong> – If path does not exist and cannot be created</p></li>
+<li><p><strong>UsageError</strong> – If the pickle file cannot be created</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True is success, UsageError is failure</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">status</span></span><a class="headerlink" href="#mfpandas.DCOLLECT.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves status of our background task.</p>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">DCOLLECT</span><span class="p">(</span><span class="s1">&#39;/path/to/binary/dcollect/file&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">status</span>
+<span class="go">{&#39;status&#39;: &#39;Ready&#39;, &#39;records_seen&#39;: {&#39;V&#39;: 37, &#39;D&#39;: 6704, &#39;A&#39;: 1392, &#39;DC&#39;: 12, &#39;SC&#39;: 12, &#39;MC&#39;: 2, &#39;SG&#39;: 11, &#39;VL&#39;: 471, &#39;BC&#39;: 1, &#39;AI&#39;: 1}, &#39;records_parsed&#39;: {&#39;V&#39;: 37, &#39;D&#39;: 6704, &#39;A&#39;: 0, &#39;DC&#39;: 0, &#39;SC&#39;: 0, &#39;MC&#39;: 0, &#39;SG&#39;: 0, &#39;VL&#39;: 0, &#39;BC&#39;: 0, &#39;AI&#39;: 0}}</span>
+<span class="gp">&gt;&gt;&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.datasets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">datasets</span></span><a class="headerlink" href="#mfpandas.DCOLLECT.datasets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Pandas Dataframe with all the parsed “D”-records. (datasets).</p>
+<p>For an explanation of the fields go to : <a class="reference external" href="https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure">https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mfpandas.DCOLLECT.datsets_on_volume">
+<span class="sig-name descname"><span class="pre">datsets_on_volume</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volser</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mfpandas.DCOLLECT.datsets_on_volume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a sorted list of all datasets on a volume.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>volume</strong> (<em>str</em>) – Volume Serial</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>UsageError</strong> – If unknown volume.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dcollect.html" class="btn btn-neutral float-left" title="Working with DCOLLECT data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cookbookdcol.html" class="btn btn-neutral float-right" title="Cookbook DCOLLECT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright H.B. Kuiper.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
