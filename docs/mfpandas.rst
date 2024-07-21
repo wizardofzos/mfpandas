@@ -8,7 +8,7 @@ Why
 The z/OS operating system exports a variety of different data into datasets.
 Traditionally these would be used inside a ``DFSort`` or ``ICETOOL`` job to query this information and generate insightful reports based on this data.
 
-With mfpanas you can do the same, but with the power of python.
+With mfpandas you can do the same, but with the power of python.
 
 The various mfpandas classes will give you the tools to convert these 'tradtional' Mainframe Datasets into Pandas DataFrames.
 
