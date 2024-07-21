@@ -24,9 +24,10 @@ Currently available classes
 History
 *******
 
-Initially, there was only "pyracf," a Python parser designed for IRRDBU00 unloads. You can find that outdated repository at https://github.com/wizardofzos/pyracf. However, we discovered another project named "pyracf" (https://github.com/ambitus/pyracf) that now cannot use the name on pypi.org. We discussed merging the two pyracf projects, but this was unsuccessful primarily because their pyracf was intended to run on z/OS, while mine was not.
+Initially, there was only "pyracf," a Python parser designed for IRRDBU00 unloads. You can find that outdated repository at https://github.com/wizardofzos/pyracf. However, I discovered another project named "pyracf" (https://github.com/ambitus/pyracf) that now cannot use the name on pypi.org. We discussed merging the two pyracf projects, but this was unsuccessful primarily because their pyracf was intended to run on z/OS, while mine was not.
 
 Driven by the need for more Pythonic ways to handle "Mainframe Things," I decided to pivot to creating mfpandas, a dedicated framework for parsing Mainframe Data into Pandas DataFrames. This shift offers several benefits: it allows for more mainframe parsing capabilities within a single pip install and frees up the pyracf name for ambitus's pyracf project.
+You'll notice some of the orgininal 'pyracf methods' are missing from the new IRRDBU00-class. This is because they need a good rewrite due to the new setup of the class (mainly documentation related).
 
 
 

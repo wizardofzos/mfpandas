@@ -23,7 +23,7 @@ If, for instance, we're looking at the "Group Basic Data" in recordtype ``0100``
 This means the resulting Pandas DataFrame is available, after parsing as ``.groups``.
 
 
-.. literalinclude:: ../src/mfpandas/IRRDBU00/__init__.py
+.. literalinclude:: ../src/mfpandas/irrdbu00.py
    :language: python
    :lines: 174-279
    :linenos:

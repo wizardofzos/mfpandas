@@ -3,6 +3,6 @@ class MFPandasException(Exception):
         self.message = message
         super().__init__(self.message)
 
-from .DCOLLECT import DCOLLECT 
-from .IRRDBU00 import IRRDBU00 
+from .dcollect import DCOLLECT 
+from .irrdbu00 import IRRDBU00 
 

@@ -1,11 +1,13 @@
 import setuptools
+import glob 
+
 
 with open("README.rst", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mfpandas",
-    version="0.0.3",
+    version="0.0.5",
     author="Wizard of z/OS",
     author_email="wizard@zdevops.com",
     description="Parsing various z/OS structures into Panda dataframes.",
@@ -20,7 +22,9 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
+    package_dir={
+        "": "src"
+        },
     packages=setuptools.find_packages(where="src"),
     include_package_data=True,
     install_requires=[
