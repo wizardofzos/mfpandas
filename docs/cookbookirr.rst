@@ -5,7 +5,7 @@ Here you'll see some examples of working with the IRRDBU00 class.
 
 For all examples here we're assuming you've already ran the following code::
 
-    from mfpandas import IRRDBU00T
+    from mfpandas import IRRDBU00
     import time
 
     r = IRRDBU00('/path/to/irrdbu00-unload')

@@ -17,12 +17,13 @@ version = release
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autosectionlabel', 'sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_markdown_builder']
+extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autosectionlabel', 'sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_markdown_builder', 'sphinx_search.extension']
 
 templates_path = ['_templates']
 exclude_patterns = ['build/*', '_build', 'Thumbs.db', '.DS_Store']
 
 import sphinx_rtd_theme
+rtd_sphinx_search_file_type = 'minified'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

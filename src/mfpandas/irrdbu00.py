@@ -43,8 +43,16 @@ class IRRDBU00:
         >>> r = IRRDBU00(irrdbu00='/path/to/irrdbu00')         
 
 
-    By issuing a ``.save_pickles(...)`` after parsing the generated DataFrames will be
+    By issuing a ``.save_pickles(path='/tmp/pickles', prefix='demo-')`` after parsing the generated DataFrames will be
     saved as pickles so you don't have to reparse the entire IRRDBU00 again.
+    You can then do::
+
+        >>> from mfpandas import IRRDBU00
+        >>> r = IRRDBU00(pickles='/tmp/pickles', prefix='demo-')
+
+    Then there's no need to parse the data again. This enables you to store different unloads 
+    and reuse them easily.
+
     See ``.save_pickles``. 
 
 
@@ -187,13 +195,24 @@ class IRRDBU00:
     _grouptreeLines     = None  # df with all supgroups up to SYS1
     _ownertreeLines     = None  # df with owners up to SYS1 or user ID
     
-    accessKeywords = [' ','NONE','EXECUTE','READ','UPDATE','CONTROL','ALTER','-owner-']
+    _accessKeywords = [' ','NONE','EXECUTE','READ','UPDATE','CONTROL','ALTER','-owner-']
     
     # errors
     errors = []
 
-    def accessAllows(level=None):
-        return IRRDBU00.accessKeywords[IRRDBU00.accessKeywords.index(level):]
+    def accessAllows(self, level=None):
+        """Returns an integer comparable value for an access level.
+        Access level of UPDATE (4) is therefore greater than READ (3).
+        
+        :param level: access level, one of ['NONE','EXECUTE','READ','UPDATE','CONTROL','ALTER','-owner-'], defaults to None
+        :type level: str
+        :return: value
+        :rtype: int
+        """
+        if level not in self._accessKeywords:
+            raise StoopidException("Unacceptable access level")
+        
+        return self._accessKeywords[self._accessKeywords.index(level):]
 
     def __init__(self, irrdbu00=None, pickles=None, prefix=''):
         # activate chained .acl() method
