@@ -9,3 +9,5 @@ Minimalistic todo list:
   - finalize DCOLLECT
   - describe 'collaboration' in docs
 
+
+This version is on 'pypi' as https://pypi.org/project/mfpandas/ but might not be ready enough yet :)
