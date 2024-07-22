@@ -17,7 +17,7 @@ version = release
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autosectionlabel', 'sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_markdown_builder', 'sphinx_search.extension']
+extensions = ['sphinx.ext.intersphinx', 'sphinx.ext.autosectionlabel', 'sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx_markdown_builder', 'sphinx_search.extension', 'sphinxcontrib.jquery']
 
 templates_path = ['_templates']
 exclude_patterns = ['build/*', '_build', 'Thumbs.db', '.DS_Store']
