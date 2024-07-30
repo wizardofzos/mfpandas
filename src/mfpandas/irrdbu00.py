@@ -543,15 +543,21 @@ class IRRDBU00:
     # start of custom dataframes
     @property
     def specials(self):
-        return self._users.loc[self._users['USBD_SPECIAL'] == 'YES']
+        """Returns a ``USBD``-dataframe with all users that have the special attribute
+        """
+        return self._users[self._users['USBD_SPECIAL'].to_numpy() == 'YES']
 
     @property
     def operations(self):
-        return self._users.loc[self._users['USBD_OPER'] == 'YES']
+        """Returns a ``USBD``-dataframe with all users that have the operations attribute
+        """        
+        return self._users[self._users['USBD_OPER'].to_numpy() == 'YES']
 
     @property
     def auditors(self):
-        return self._users.loc[self._users['USBD_AUDITOR'] == 'YES']
+        """Returns a ``USBD``-dataframe with all users that have the auditor attribute
+        """        
+        return self._users[self._users['USBD_AUDITOR'].to_numpy() == 'YES']
 
     @property
     def revoked(self):
