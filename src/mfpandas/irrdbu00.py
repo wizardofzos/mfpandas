@@ -55,6 +55,22 @@ class IRRDBU00:
 
     See ``.save_pickles``. 
 
+    Creating an IRRDBU00 file
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    
+    To create an IRRDBU00 dataset on z/OS amend and execute the following JCL::
+
+        //UNLOAD   EXEC PGM=IRRDBU00,PARM=NOLOCKINPUT
+        //SYSPRINT   DD SYSOUT=*
+        //INDD1    DD   DISP=SHR,DSN=PATH.TO.YOUR.RACFDB
+        //OUTDD    DD   DISP=(,CATLG,DELETE),
+        //              DSN=YOUR.IRRDBU00.FILE,
+        //              DCB=(RECFM=VB,LRECL=4096),
+        //              SPACE=(CYL,(50,150),RLSE)
+
+    Then, transfer “YOUR.IRRDBU00.FILE” to your machine. Make sure this is an ASCII transfer.
+    
+
 
     """    
     # Our states
@@ -200,27 +216,7 @@ class IRRDBU00:
     # errors
     errors = []
 
-    def accessAllows(self, level=None):
-        """Returns an integer comparable value for an access level.
-        Access level of UPDATE (4) is therefore greater than READ (3).
-        
-        :param level: access level, one of ['NONE','EXECUTE','READ','UPDATE','CONTROL','ALTER','-owner-'], defaults to None
-        :type level: str
-        :return: value
-        :rtype: int
-        """
-        if level not in self._accessKeywords:
-            raise StoopidException("Unacceptable access level")
-        
-        return self._accessKeywords[self._accessKeywords.index(level):]
-
     def __init__(self, irrdbu00=None, pickles=None, prefix=''):
-        # activate chained .acl() method
-        # so we can do  e.g. msys._datasetAccess.loc[['SYS1.**']].acl(permits=True, explode=False, resolve=False, admin=False, sort="user")
-        pd.core.base.PandasObject.acl = lambda *x,**y: IRRDBU00.acl(self,*x,**y)
-        pd.core.base.PandasObject.gfilter = IRRDBU00.gfilter
-        pd.core.base.PandasObject.rfilter = IRRDBU00.rfilter
-
         self._state = self.STATE_INIT
 
         if not irrdbu00 and not pickles:
@@ -253,7 +249,7 @@ class IRRDBU00:
                     }
                     self._unloadlines += recordsRetrieved
 
-            # create remaining public DFs as empty
+            # create remaining public DFs as empty (think can be removed now too)
             for (rtype,rinfo) in IRRDBU00._recordtype_info.items():
                 if not hasattr(self, rinfo['df']):
                     setattr(self, rinfo['df'], pd.DataFrame())
@@ -407,6 +403,9 @@ class IRRDBU00:
         if self.THREAD_COUNT == 0:
             self._state = self.STATE_READY         
             self._stoptime = datetime.now()
+
+        # clenaup some memory
+        del self._parsed
         return True
 
     def parsed(self, rname):
@@ -497,49 +496,10 @@ class IRRDBU00:
             raise StoopidException(f'unexpected last parameter {option}')
 
 
-    def gfilter(df, *selection):
-        ''' Search profiles using GENERIC pattern on the index fields.  selection can be one or more values, corresponding to index levels of the df '''
-        locs = pd.array([True]*df.shape[0])
-        for s in range(len(selection)):
-            if selection[s] not in (None,'**'):
-                if selection[s]=='*':
-                    locs &= (df.index.get_level_values(s)=='*')
-                else: 
-                    locs &= (df.index.get_level_values(s).str.match(IRRDBU00._generic2regex(selection[s])))
-        return df.loc[locs]
 
-    def rfilter(df, *selection):
-        ''' Search profiles using refex on the index fields.  selection can be one or more values, corresponding to index levels of the df '''
-        locs = pd.array([True]*df.shape[0])
-        for s in range(len(selection)):
-            if selection[s] not in (None,'**','.*'):
-                locs &= (df.index.get_level_values(s).str.match(selection[s]))
-        return df.loc[locs]
 
-    # user frames
-
-    def user(self, userid=None, pattern=None):
-        return self._giveMeProfiles(self._users, userid, pattern)
-
-    def connect(self, group=None, userid=None, pattern=None):
-        ''' connect('SYS1') returns 1 index level with user IDs, connect(None,'IBMUSER') returns 1 index level with group names '''
-        if pattern=='L' or pattern=='LIST':
-            return self._giveMeProfiles(self._connectData, (group,userid), pattern)
-        else:
-            if group and (not userid or userid=='**'):
-                # with group given, return connected user IDs via index (.loc['group'] strips level(0))
-                selection = group
-            elif userid and (not group or group=='**'):
-                # with user ID given, return connected groups via index (only level(0))
-                return self._connectData.loc[(slice(None),userid),].droplevel(1)
-            else:
-                # with group + user ID given, return 1 entry with all index levels (because only the data columns will be of interest)
-                selection = [(group,userid)]
-            try:
-                return self._connectData.loc[selection]
-            except KeyError:
-                return self._connectData.head(0)  # empty frame
-
+        
+    
     # start of custom preselected dataframes.
     @property
     def specials(self):
@@ -563,13 +523,17 @@ class IRRDBU00:
     def revoked(self):
         """Returns a ``USBD``-dataframe with all users that are revoked
         """
-        return self._users.loc[self._users['USBD_REVOKE'] == 'YES']
+        return self._users[self._users['USBD_REVOKE'].to_numpy() == 'YES']
 
-    @property
+    def user(self, userid=None):
+        """Returns a ``USBD``-dataframe with for the selected userid (empty if non-existing user)
+        """       
+        return self._users[self._users['USBD_NAME'].to_numpy()==userid]
+
     def group(self, group=None):
         """Returns a ``GPBD``-dataframe for the selected group
         """        
-        return self.groups[self.groups['GPBD_NAME'].to_numpy()==group]
+        return self._groups[self._groups['GPBD_NAME'].to_numpy()==group]
 
     @property
     def emptyGroups(self):
@@ -617,29 +581,8 @@ class IRRDBU00:
         return self._datasets[self._datasets['DSBD_UACC'].to_numpy()=="ALTER"]
 
     @property
-    def general(self, resclass=None, profile=None, pattern=None):
-        return self._giveMeProfiles(self._generals, (resclass,profile), pattern)
-
-    @property    
-    def generalPermit(self, resclass=None, profile=None, id=None, access=None, pattern=None):
-        return self._giveMeProfiles(self._generalAccess, (resclass,profile,id,access), pattern)
-  
-    @property
-    def generalConditionalPermit(self, resclass=None, profile=None, id=None, access=None, pattern=None):
-        return self._giveMeProfiles(self._generalConditionalAccess, (resclass,profile,id,access), pattern)
-
-    @property
-    def SSIGNON(self): # GRSIGN
-        return self._generalSSIGNON.join(self._generals['GRBD_APPL_DATA'])
-
-
-
-    
-
-    
-    @property
     def orphans(self):
-        """Returns two dataframes datasetOrphans and generalOrphans.
+        """Returns a tuple of two dataframes ``datasetOrphans`` and ``generalOrphans``.
         these are formatted like the DataFrames you get with ``datasetAccess`` and 
         ``generalAccess`` except you'll only see those entries that have an AUTH_ID on the 
         accesslist that's no longer present in the database.
@@ -2044,7 +1987,7 @@ class IRRDBU00:
         ================= =======================================================================================================================
         DSCSD_RECORD_TYPE Record type of the Data Set CSDATA custom fields record (0431).
         DSCSD_NAME        Data set name as taken from the profile name.
-        DSCSD_VOL         Volume upon which this data set resides. Blank if the profile is generic, and *MODEL if the profile is a model profile.
+        DSCSD_VOL         Volume upon which this data set resides. Blank if the profile is generic, and \*MODEL if the profile is a model profile.
         DSCSD_TYPE        Data type for the custom field. Valid values are CHAR, FLAG, HEX, NUM.
         DSCSD_KEY         Custom field keyword; maximum length = 8.
         DSCSD_VALUE       Custom field value.
