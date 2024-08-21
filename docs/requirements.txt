@@ -1,3 +1,4 @@
 sphinx_markdown_builder
 sphinx_rtd_theme
 readthedocs-sphinx-search
+sphinx_new_tab_link
