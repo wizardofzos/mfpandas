@@ -540,7 +540,7 @@ class IRRDBU00:
             except KeyError:
                 return self._connectData.head(0)  # empty frame
 
-    # start of custom dataframes
+    # start of custom preselected dataframes.
     @property
     def specials(self):
         """Returns a ``USBD``-dataframe with all users that have the special attribute
@@ -561,48 +561,60 @@ class IRRDBU00:
 
     @property
     def revoked(self):
+        """Returns a ``USBD``-dataframe with all users that are revoked
+        """
         return self._users.loc[self._users['USBD_REVOKE'] == 'YES']
 
-
+    @property
+    def group(self, group=None):
+        """Returns a ``GPBD``-dataframe for the selected group
+        """        
+        return self.groups[self.groups['GPBD_NAME'].to_numpy()==group]
 
     @property
-    def group(self, group=None, pattern=None):
-        return self._giveMeProfiles(self._groups, group, pattern)
-
-    @property
-    def groupsWithoutUsers(self):
+    def emptyGroups(self):
+        """Returns a ``GPBD``-dataframe of all groups that have no members.
+        """
         if self._state != self.STATE_READY:
             raise StoopidException('Not done parsing yet! (PEBKAM/ID-10T error)')
         return self._groups.loc[~self.groups.GPBD_NAME.isin(self._connectData.USCON_GRP_ID)]
     
 
     @property
-    def dataset(self, profile=None, pattern=None):
-        return self._giveMeProfiles(self._datasets, profile, pattern)
+    def dataset(self, profile=None):
+        """Returns a ``DSBD``-dataframe of the requested dataset.
+        """
+        return self.datasets[self.datasets['DSBD_NAME'].to_numpy()==profile]
 
     @property
-    def datasetConditionalPermit(self, profile=None, id=None, access=None, pattern=None):
-        return self._giveMeProfiles(self._datasetConditionalAccess, (profile,id,access), pattern)
-
-    @property
-    def datasetPermit(self, profile=None, id=None, access=None, pattern=None):
-        return self._giveMeProfiles(self._datasetAccess, (profile,id,access), pattern)
+    def datasetPermit(self, profile=None):
+        """Returns a ``DSACC``-dataframe for the requested dataset.
+        """
+        return self.datasetAccess[self.datasetAccess['DSACC_NAME'].to_numpy()==profile]
 
     @property
     def uacc_read_datasets(self):
-        return self._datasets.loc[self._datasets.DSBD_UACC=="READ"]
+        """Returns a ``DSBD``-dataframe of all datasets that have UACC=READ (bad!)
+        """
+        return self._datasets[self._datasets['DSBD_UACC'].to_numpy()=="READ"]
     
     @property
     def uacc_update_datasets(self):
-        return self._datasets.loc[self._datasets.DSBD_UACC=="UPDATE"]
+        """Returns a ``DSBD``-dataframe of all datasets that have UACC=UPDATE (really bad!)
+        """        
+        return self._datasets[self._datasets['DSBD_UACC'].to_numpy()=="UPDATE"]
     
-    @property
+    @property   
     def uacc_control_datasets(self):
-        return self._datasets.loc[self._datasets.DSBD_UACC=="CONTROL"]
+        """Returns a ``DSBD``-dataframe of all datasets that have UACC=CONTROL (really bad!)
+        """            
+        return self._datasets[self._datasets['DSBD_UACC'].to_numpy()=="CONTROL"]
     
     @property
     def uacc_alter_datasets(self):
-        return self._datasets.loc[self._datasets.DSBD_UACC=="ALTER"]
+        """Returns a ``DSBD``-dataframe of all datasets that have UACC=ALTER (really bad!)
+        """            
+        return self._datasets[self._datasets['DSBD_UACC'].to_numpy()=="ALTER"]
 
     @property
     def general(self, resclass=None, profile=None, pattern=None):
