@@ -11,7 +11,7 @@
 project = 'mfpandas'
 copyright = 'H.B. Kuiper'
 author = 'H.B. Kuiper'
-release = '0.0.5'
+release = '0.0.6'
 version = release
 
 # -- General configuration ---------------------------------------------------
