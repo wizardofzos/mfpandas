@@ -267,8 +267,14 @@ class DCOLLECT:
                     expraw = restrec[106:110].hex()[0:7]
                     if expraw == '0000000':
                         expdte = False
+                    elif expraw[4:] == '000':
+                        expdte = False 
                     else:
-                        expdte =  datetime.datetime.strptime(expraw, '%Y%j').date()
+                        try:
+                            expdte =  datetime.datetime.strptime(expraw, '%Y%j').date()
+                        except:
+                            expdte = False
+                    
                     self._DRECS['DCDEXPDT'].append(expdte)
 
                     lrraw = restrec[110:114].hex()[0:7]
