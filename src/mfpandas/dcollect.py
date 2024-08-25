@@ -273,6 +273,7 @@ class DCOLLECT:
                         try:
                             expdte =  datetime.datetime.strptime(expraw, '%Y%j').date()
                         except:
+                            # https://www.mxg.com/changes/chng0808.asp
                             expdte = False
                     
                     self._DRECS['DCDEXPDT'].append(expdte)
