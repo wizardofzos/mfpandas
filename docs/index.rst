@@ -1,6 +1,9 @@
-.. include:: ../README.rst
+.. image:: img/mfpandas.png
+  :width: 400
+  :align: center
+  :alt: MFPANDAS logo
 
-
+  
 .. note::
 
    This project is under active development.
