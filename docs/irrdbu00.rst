@@ -117,7 +117,7 @@ Now, just for a quick and dirty result you enter an interactive python terminal 
     >>> racf = IRRDBU00(irrdbu00='/home/henri/irrdbu00')
     >>> racf.parse_fancycli(recordtypes=['0200'])
     24-07-01 20:35:15 - parsing /home/henri/irrdbu00
-    24-07-01 20:35:23 - progress: ▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉▉                      (26.98%)
+    24-07-01 20:35:23 - progress: ..........                    (26.98%)
 
 After parsing is finished can start interactively coding the solution::
 
