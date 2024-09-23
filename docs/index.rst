@@ -3,10 +3,6 @@
   :align: center
   :alt: MFPANDAS logo
 
-  
-.. note::
-
-   This project is under active development.
 
 Contents
 --------
