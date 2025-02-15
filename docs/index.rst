@@ -13,6 +13,7 @@ Contents
    :caption: Contents:
 
    The mfpandas library <mfpandas>
+   Installation <install>
    Working with IRRDBU00 data <irrdbu00>
    Working with SETROPTS LIST data <setropts>
    Working with DCOLLECT data <dcollect>

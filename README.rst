@@ -1,14 +1,13 @@
 mfpandas
 ########
 
-This is still being worked on. Once 'ready' it will replace https://pypi.org/project/pyracf/ 
+The framework for working with various Mainframe (z/OS) datastructures via Pandas Dataframes.
+Read the docs at https:/mfpandas.readthedocs.io 
 
-Minimalistic todo list:
+Installation::
 
-  - document all (current) IRRDBU00 Things (done)
-  - finalize DCOLLECT
-  - describe 'collaboration' in docs
-  - extend cookbooks
+    pip install mfpandas 
 
 
-This version is on 'pypi' as https://pypi.org/project/mfpandas/ but might not be ready enough yet :)
+This used to be `pyracf` but that name is now being used by an awesome framework to work with RACF directly from python.
+Read more about it via: https://github.com/ambitus/pyracf 
