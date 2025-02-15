@@ -1,20 +1,13 @@
 Working with IRRDBU00 data
 ##########################
 
-The :doc:`IRRDBU00 Class <irrdbu00class>` is made to work with IRRDBU00 data. 
+The :py:class:`mfpandas.IRRDBU00` is made to work with IRRDBU00 data. 
 It will give you methods to get:
 
   - *standard dataframes*: strict conversion of IRRDBU00 recordtypes to Pandas DataFrames
   - *augmented dataframes*: like standard dataframes but with extra columns added
   - *specialised dataframes*: preselected queries we all want to do on our RACF
   - *handy add-ons*: extra query features, data structures, xlsx-generation etc.
-
-
-
-
-
-Standard DataFrames
-*******************
 
 Below you will see one of the core pieces of code of the parsing stucture.
 The 'key' of the dictionary (0100, 0101, etc.) is the recordtype from the IRRDBU00 unload as described in https://www.ibm.com/docs/en/zos/3.1.0?topic=records-irrdbu00-record-types. 
@@ -70,26 +63,13 @@ is a simple::
 
 And you'll get a list of all group names.
 
-Augmented DataFrames
-********************
+IRRDBU00 Examples
+*****************
 
-.. .. autoclass:: mfpandas.IRRDBU00
-..     :members: 
-..     :private-members:
-..     :special-members:
-..     :noindex:
+Passphrase report
+-----------------
 
-Specialised DataFrames
-**********************
-
-Handy add-ons
-*************
-
-Examples
-********
-
-You need to get a report of all the users on the system that are still don't have a passphrase.
-===============================================================================================
+Suppose you need to get a report of all the users on the system that still don't have a passphrase.
 
 First you create an ``IRRDBU00``-unload via the following JCL::
 
@@ -102,6 +82,8 @@ First you create an ``IRRDBU00``-unload via the following JCL::
     //              DCB=(RECFM=VB,LRECL=4096,BLKSIZE=20480)   
 
 After submitting the above JCL, you transfer the ``HLQ.TO.UNLOAD.FILE`` (ASCII) to your Linux box (currently mfpandas does not run on z/OS, due to Pandas not working nicely on z/OS yet...)
+
+For more information on the IRRDBU00-utility please refer to the `IBM Documenation <https://www.ibm.com/docs/en/zos/3.1.0?topic=database-using-racf-unload-utility-irrdbu00>`
 
 Once the file is receieved you create a folder for your work and install the mfpandas library like below::
 
@@ -143,4 +125,25 @@ give all these users a new 'one time' passphrase they must change after first lo
     >>> with open('/givethemprases.txt') as f:
     ...   f.writelines(commands)
 
-After which you can easily stick that on the end of an ``IKJEFT01`` to execute the commands.
+After which you can easily stick that on the end of an ``IKJEFT01`` to execute the commands :)
+
+Special users report
+--------------------
+
+Assuming you still have the irrdbu00-unload file available::
+
+    from mfpandas import IRRDBU00
+    import time
+
+    r = IRRDBU00('/path/to/irrdbu00-unload')
+    r.parse()
+    while r.status['status'] != 'Ready':
+        time.sleep(1)
+
+
+Let's find all special users and their last logon date::
+
+    >>>r.specials[['USBD_NAME','USBD_LASTJOB_DATE']]
+            USBD_NAME USBD_LASTJOB_DATE
+    5491    IBMUSER         1984-12-15
+    5830    EMERG01         2024-01-05

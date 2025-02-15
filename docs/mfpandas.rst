@@ -18,8 +18,9 @@ on top of it.
 
 Currently available classes
 
-  - :doc:`IRRDBU00 <irrdbu00class>` 
-  - :doc:`DCOLLECT <dcollectclass>` 
+  - :doc:`IRRDBU00 <irrdbu00>` 
+  - :doc:`DCOLLECT <dcollect>` 
+  - :doc:`SETROPTS <setropts>`
 
 Drop me note at wizard@zdevops.com if you've made an (Open Sourced) tool that uses this framework, and I'll mention you here somewhere for sure.
 

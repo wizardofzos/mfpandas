@@ -5,4 +5,5 @@ class MFPandasException(Exception):
 
 from .dcollect import DCOLLECT 
 from .irrdbu00 import IRRDBU00 
+from .setropts import SETROPTS
 
