@@ -675,14 +675,14 @@ class IRRDBU00:
             newdata['Profiles'] = []
             for id in authIDsInClass:
                 newdata[id] = [None] * len(profilesInClass)
-            classdata = classes.get_group(c)
+            classdata = classes.get_group((c))
             profiles = classdata.groupby(['GRACC_NAME'])
             for i,p in enumerate(profiles.groups):
-                profiledata = profiles.get_group(p)
+                profiledata = profiles.get_group((p))
                 newdata['Profiles'].append(p)
                 users = profiledata.groupby(['GRACC_AUTH_ID'])
                 for u in users.groups:
-                    useraccess = users.get_group(u)['GRACC_ACCESS'].values[0]
+                    useraccess = users.get_group((u))['GRACC_ACCESS'].values[0]
                     newdata[u][i] = accessLevels[useraccess]
             df1 = pd.DataFrame(newdata)
             df1.to_excel(writer, sheet_name=c, index=False)
@@ -717,11 +717,11 @@ class IRRDBU00:
                     newdata[id] = [None] * len(profilesInClass)
             profiles = self.datasetAccess.groupby(['DSACC_NAME'])
             for i,p in enumerate(profiles.groups):
-                profiledata = profiles.get_group(p)
+                profiledata = profiles.get_group((p))
                 newdata['Profiles'].append(p)
                 users = profiledata.groupby(['DSACC_AUTH_ID'])
                 for u in users.groups:
-                    useraccess = users.get_group(u)['DSACC_ACCESS'].values[0]
+                    useraccess = users.get_group((u))['DSACC_ACCESS'].values[0]
                     newdata[u][i] = accessLevels[useraccess]
 
             df1 = pd.DataFrame(newdata)
