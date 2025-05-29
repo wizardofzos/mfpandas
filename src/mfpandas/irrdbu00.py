@@ -228,6 +228,8 @@ class IRRDBU00:
                 self._state    = self.STATE_INIT
                 self._unloadlines = sum(1 for _ in open(self._irrdbu00, errors="ignore"))
 
+        pandas_2_2_0 = pd.__version__ >= '2.2.0' # to test if we use newer pandas
+
         if pickles:
             # Read from pickles dir
             picklefiles = glob.glob(f'{pickles}/{prefix}*.pickle')
@@ -630,6 +632,8 @@ class IRRDBU00:
         if self.parsed("DSACC") + self.parsed("GRACC") == 0:
             raise StoopidException('No dataset/general access records parsed! (PEBKAM/ID-10T error)')
 
+        pandas_2_2_0 = pd.__version__ >= '2.2.0' # to test if we use newer pandas
+
         writer = pd.ExcelWriter(f'{fileName}', engine='xlsxwriter')
         accessLevelFormats = {
                     'N': writer.book.add_format({'bg_color': 'silver'}),
@@ -675,14 +679,23 @@ class IRRDBU00:
             newdata['Profiles'] = []
             for id in authIDsInClass:
                 newdata[id] = [None] * len(profilesInClass)
-            classdata = classes.get_group((c))
+            if pandas_2_2_0:
+                classdata = classes.get_group((c,))
+            else:
+                classdata = classes.get_group(c)
             profiles = classdata.groupby(['GRACC_NAME'])
             for i,p in enumerate(profiles.groups):
-                profiledata = profiles.get_group((p))
+                if pandas_2_2_0:
+                    profiledata = profiles.get_group((p,))
+                else:
+                    profiledata = profiles.get_group(p)
                 newdata['Profiles'].append(p)
                 users = profiledata.groupby(['GRACC_AUTH_ID'])
                 for u in users.groups:
-                    useraccess = users.get_group((u))['GRACC_ACCESS'].values[0]
+                    if pandas_2_2_0:
+                        useraccess = users.get_group((u,))['GRACC_ACCESS'].values[0]
+                    else:
+                        useraccess = users.get_group(u)['GRACC_ACCESS'].values[0]
                     newdata[u][i] = accessLevels[useraccess]
             df1 = pd.DataFrame(newdata)
             df1.to_excel(writer, sheet_name=c, index=False)
@@ -717,11 +730,17 @@ class IRRDBU00:
                     newdata[id] = [None] * len(profilesInClass)
             profiles = self.datasetAccess.groupby(['DSACC_NAME'])
             for i,p in enumerate(profiles.groups):
-                profiledata = profiles.get_group((p))
+                if pandas_2_2_0:
+                    profiledata = profiles.get_group((p,))
+                else:
+                     profiledata = profiles.get_group(p)
                 newdata['Profiles'].append(p)
                 users = profiledata.groupby(['DSACC_AUTH_ID'])
                 for u in users.groups:
-                    useraccess = users.get_group((u))['DSACC_ACCESS'].values[0]
+                    if pandas_2_2_0:
+                        useraccess = users.get_group((u,))['DSACC_ACCESS'].values[0]
+                    else:
+                        useraccess = users.get_group(u)['DSACC_ACCESS'].values[0]
                     newdata[u][i] = accessLevels[useraccess]
 
             df1 = pd.DataFrame(newdata)
