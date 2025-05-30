@@ -179,8 +179,11 @@ class SETROPTS:
 
     def __init__(self, setropts=None, pickles=None, prefix=None):
         if pickles == None:
-            self._setropts = setropts
-            self._parse()
+            if setropts == None:
+                pass
+            else:
+                self._setropts = setropts
+                self._parse()
         else:
             # Read from pickles dir
             picklefiles = glob.glob(f'{pickles}/{prefix}*.pickle')
