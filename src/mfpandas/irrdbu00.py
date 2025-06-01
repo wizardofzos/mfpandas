@@ -18,6 +18,8 @@ import xlsxwriter
 import os
 import glob
 
+import re
+
 import warnings 
 
 class StoopidException(Exception):
@@ -452,7 +454,7 @@ class IRRDBU00:
                 pass
 
 
-    def _generic2regex(selection, lenient='%&*'):
+    def _generic2regex(self, selection, lenient='%&*'):
         ''' Change a RACF generic pattern into regex to match with text strings in pandas cells.  use lenient="" to match with dsnames/resources '''
         if selection in ('**',''):
             return '.*$'
@@ -467,41 +469,46 @@ class IRRDBU00:
                     .replace('`lenient`',lenient)\
                     +'$'
 
-
-    def _giveMeProfiles(self, df, selection=None, option=None):
-        ''' Search profiles using the index fields.  selection can be str or tuple.  Tuples check for group + user id in connects, or class + profile key in generals.
-        option controls how selection is interpreted, and how data must be returned:
-        None is for (expensive) backward compatibility, returns a df with 1 profile.
-        LIST returns a series for 1 profile, much faster and easier to process.
-        '''
-        if not selection:
-            raise StoopidException('profile criteria not specified...')
-        if option in (None,'LIST','L'):  # return 1 profile
-            # 1 string, several strings in a tuple, or a mix of strings and None
-            if type(selection)==str and not option:
-                selection = [selection]  # [] forces return of a df, not a Series
-            elif type(selection)==tuple:
-                if any([s in (None,'**') for s in selection]):  # any qualifiers are a mask
-                    selection = tuple(slice(None) if s in (None,'**') else s for s in selection),
+    def _profile_specificity(self, profile):
+        score = 0
+        segments = profile.split('.')
+        for seg in segments:
+            i = 0
+            while i < len(seg):
+                if seg[i:i+2] == '**':
+                    score += 0.5
+                    i += 2
+                elif seg[i] == '*':
+                    score += 1
+                    i += 1
+                elif seg[i] == '%':
+                    score += 2
+                    i += 1
                 else:
-                    selection = [selection]
-            else:
-                pass
-            try:
-                return df.loc[selection]
-            except KeyError:
-                if not option:  # return empty DataFrame with all the original columns
-                    return df.head(0)
-                else:  # return Series 
-                    return []
-        else:
-            raise StoopidException(f'unexpected last parameter {option}')
+                    score += 3
+                    i += 1
+        return (score, len(segments), len(profile))  # more segments, longer is better
 
 
 
+    def dataset_profile_for(self, datasetname=''):
+        """Given a dataset name, find the best matching RACF dataset profile and return that ``DSBD``-dataframe"""
+        matches = []
+        hlq = datasetname.split('.')[0]
+        df = self._datasets.loc[self._datasets.DSBD_NAME.str.startswith(hlq)]
+        for profile in df['DSBD_NAME']:
+            # pattern = racf_to_regex(profile)
+            pattern = self._generic2regex(profile)
+            if re.match(pattern, datasetname):
+                matches.append((profile, self._profile_specificity(profile)))
 
-        
-    
+        if not matches:
+            return None  # No match found
+
+        # Return the profile with the highest specificity
+        best_match = max(matches, key=lambda x: x[1])
+        return self.dataset(profile=best_match[0])
+
     # start of custom preselected dataframes.
     @property
     def specials(self):
@@ -546,13 +553,12 @@ class IRRDBU00:
         return self._groups.loc[~self.groups.GPBD_NAME.isin(self._connectData.USCON_GRP_ID)]
     
 
-    @property
     def dataset(self, profile=None):
         """Returns a ``DSBD``-dataframe of the requested dataset.
         """
         return self.datasets[self.datasets['DSBD_NAME'].to_numpy()==profile]
 
-    @property
+
     def datasetPermit(self, profile=None):
         """Returns a ``DSACC``-dataframe for the requested dataset.
         """

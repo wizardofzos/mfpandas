@@ -147,3 +147,9 @@ Let's find all special users and their last logon date::
             USBD_NAME USBD_LASTJOB_DATE
     5491    IBMUSER         1984-12-15
     5830    EMERG01         2024-01-05
+
+Let's see if we have a datasetprofile protecting `HSM.SECRET.SAUCE`::
+    
+    >>> r.dataset_profile_for(datasetname='HSM.SECRET.SAUCE')[['DSBD_NAME','DSBD_UACC']]
+        DSBD_NAME DSBD_UACC
+    49324  HSM.*.**      NONE
