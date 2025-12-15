@@ -2,7 +2,7 @@ mfpandas
 ########
 
 The framework for working with various Mainframe (z/OS) datastructures via Pandas Dataframes.
-Read the docs at https:/mfpandas.readthedocs.io 
+Read the docs at https://mfpandas.readthedocs.io 
 
 Installation::
 
