@@ -7,7 +7,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mfpandas",
-    version="0.1.4",
+    version="0.1.5",
     author="Wizard of z/OS",
     author_email="wizard@zdevops.com",
     description="Parsing various z/OS structures into Panda dataframes.",

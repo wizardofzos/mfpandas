@@ -62,7 +62,7 @@ class DCOLLECT:
         Initialize the DCOLLECT class.
         Recordlayout from: https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure
 
-        Recordtypes supported: D (Datasets), V (Volumes).
+        Recordtypes supported: D (Datasets), V (Volumes), DC (DataClass).
 
         :param dcollect: Full path to DCOLLECT file
         :type dcollect: str
@@ -153,7 +153,166 @@ class DCOLLECT:
             'DCVSGTCL': [],
             'DCVDPTYP': [],
 
-        }                   
+        }          
+
+        self._DCRECS = {
+            # Header Information
+            'DDCNAME': [],       # Name of Data Class
+            'DDCUSER': [],       # Userid of last updater
+            'DDCDATE': [],       # Date of last update
+            'DDCTIME': [],       # Time of last update
+            'DDCDESC': [],       # Description
+            
+            # Specification Flags (DDCSPEC1)
+            'DDCFRORG': [],      # RECORG specified
+            'DDCFLREC': [],      # LRECL specified
+            'DDCFRFM': [],       # RECFM specified
+            'DDCFKLEN': [],      # KEYLEN specified
+            'DDCFKOFF': [],      # KEYOFF specified
+            'DDCFEXP': [],       # Expiration attribute specified
+            'DDCFRET': [],       # Retention attribute specified
+            'DDCFPSP': [],       # Primary space specified
+            
+            # Specification Flags (DDCSPEC2)
+            'DDCFSSP': [],       # Secondary space specified
+            'DDCFDIR': [],       # Directory blocks specified
+            'DDCFAUN': [],       # Allocation unit specified
+            'DDCFAVR': [],       # AVGREC specified
+            'DDCFVOL': [],       # Volume count specified
+            'DDCFCIS': [],       # Data CI size specified
+            'DDCFCIF': [],       # Free CI % specified
+            'DDCFCAF': [],       # Free CA % specified
+            
+            # Specification Flags (DDCSPEC3)
+            'DDCFXREG': [],      # SHAREOPT XREGION specified
+            'DDCFXSYS': [],      # SHAREOPT XSYSTEM specified
+            'DDCFIMBD': [],      # VSAM IMBED specified
+            'DDCFRPLC': [],      # VSAM REPLICATE specified
+            'DDCFCOMP': [],      # Compaction specified
+            'DDCFMEDI': [],      # Media type specified
+            'DDCFRECT': [],      # Recording technology specified
+            'DDCFVEA': [],       # VSAM extended addressing
+            
+            # Specification Flags (DDCSPEC4)
+            'DDCSPRLF': [],      # Space constraint relief
+            'DDCREDUS': [],      # Reduce space by % specified
+            'DDCRABS': [],       # Rec access bias specified
+            'DDCFCT': [],        # Compression type specified
+            'DDCBLMT': [],       # Block size limit specified
+            'DDCCFS': [],        # RLS CF cache specified
+            'DDCDVCS': [],       # Dynamic volume count specified
+            'DDCFSCAL': [],      # Performance scaling specified
+            
+            # Data Set Attributes
+            'DDCRCORG': [],      # Data set RECORG
+            'DDCRECFM': [],      # Data set RECFM
+            'DDCBLK': [],        # Blocked (1) or Unblocked (0)
+            'DDCSTSP': [],       # Standard or spanned
+            'DDCCNTL': [],       # Carriage control
+            'DDCRETPD': [],      # Retention period
+            'DDCEXPYR': [],      # Expiration year
+            'DDCEXPDY': [],      # Expiration day of year
+            'DDCVOLCT': [],      # Max volume count
+            'DDCDSNTY': [],      # DSN type
+            
+            # Space Attributes
+            'DDCSPPRI': [],      # Primary space amount
+            'DDCSPSEC': [],      # Secondary space amount
+            'DDCDIBLK': [],      # Directory blocks
+            'DDCAVREC': [],      # AVGREC (M, K, U)
+            'DDCREDUC': [],      # Reduce primary/secondary by %
+            'DDCRBIAS': [],      # VSAM record access bias
+            'DDCDVC': [],        # Dynalloc vol count
+            'DDCAUNIT': [],      # Allocation unit amount
+            'DDCBSZLM': [],      # Block size limit
+            'DDCLRECL': [],      # Record length
+            
+            # VSAM Attributes
+            'DDCCISZ': [],       # CISIZE
+            'DDCCIPCT': [],      # CI freespace %
+            'DDCCAPCT': [],      # CA freespace %
+            'DDCSHROP': [],      # VSAM share options
+            'DDCXREG': [],       # XREGION share options
+            'DDCXSYS': [],       # XSYSTEM share options
+            'DDCIMBED': [],      # IMBED option
+            'DDCREPLC': [],      # REPLICATE option
+            'DDCKLEN': [],       # Key length
+            'DDCKOFF': [],       # Key offset
+            'DDCCAMT': [],       # Candidate amount
+            
+            # Mountable Device Attributes
+            'DDCCOMP': [],       # Compaction type
+            'DDCMEDIA': [],      # Media type
+            'DDCRECTE': [],      # Recording technology
+            
+            # Record Sharing and Logging
+            'DDCBWOTP': [],      # RWO type
+            'DDCLOGRC': [],      # Sphere recoverability
+            'DDCSPAND': [],      # Record spans CI ability
+            'DDCFRLOG': [],      # CICSVR FRLOG type
+            'DDCLOGLN': [],      # Log stream ID length
+            'DDCLOGID': [],      # Log stream ID
+            
+            # Extended Specification Flags (DDCSPECX)
+            'DDCBWOS': [],       # BWO specified
+            'DDCLOGRS': [],      # Sphere recoverability specified
+            'DDCSPANS': [],      # CI span specified
+            'DDCLSIDS': [],      # Logstream ID specified
+            'DDCFRLGS': [],      # CICSVR FRLOG specification
+            'DDCFEXTC': [],      # Extent constraint specified
+            'DDCFA2GB': [],      # RLS above 2GB specified
+            'DDCFPSEG': [],      # Performance segmentation specified
+            
+            # Extended Specification Flags (DDCSPECB)
+            'DDCFKYL1': [],      # Keylabel 1 specified
+            'DDCFKYC1': [],      # Keycode 1 specified
+            'DDCFKYL2': [],      # Keylabel 2 specified
+            'DDCFKYC2': [],      # Keycode 2 specified
+            'DDCFVSP': [],       # SMBVSP specified
+            'DDCFSDB': [],       # SDB specified
+            'DDCFOVRD': [],      # Override JCK specified
+            'DDCFCAR': [],       # CA reclaim specified
+            
+            # Extended Specification Flags (DDCSPECC)
+            'DDCFATTR': [],      # EATTR specified
+            'DDCFLOGR': [],      # Log replication specified
+            'DDCFRMOD': [],      # VSAM SMB RMODE31 specified
+            'DDCGSRDU': [],      # Guaranteed space reduction
+            'DDCFKLBL': [],      # DASD data set key label specified
+            
+            # VSAM Extended Attributes
+            'DDCREUSE': [],      # Reuse on open
+            'DDCSPEED': [],      # Speed mode
+            'DDCEX255': [],      # Over 255 extents allowed
+            'DDCLOGRP': [],      # Log replication
+            'DDCEATTR': [],      # Extended attribute
+            'DDCCT': [],         # Compression type
+            'DDCDSCF': [],       # RLS CF cache value
+            'DDCA2GB': [],       # RLS above 2GB bar
+            'DDCRECLM': [],      # CA reclaim
+            'DDCBSZL2': [],      # Block size limit value (lower 4 bytes)
+            
+            # Tape Attributes
+            'DDCPSCA': [],       # Performance scaling
+            'DDCPSEG': [],       # Performance segmentation
+            
+            # SMB VSP
+            'DDCVSPUK': [],      # Unit is KB
+            'DDCVSPUM': [],      # Unit is MB
+            'DDCVSPV': [],       # SMBVSP value
+            
+            # Key Labels
+            'DDCKLBL1': [],      # Keylabel 1 length
+            'DDCKLBN1': [],      # Keylabel 1 name
+            'DDCKYCD1': [],      # Keycode 1
+            'DDCKLBL2': [],      # Keylabel 2 length
+            'DDCKLBN2': [],      # Keylabel 2 name
+            'DDCKYCD2': [],      # Keycode 2
+            
+            # DASD Data Set Key Label
+            'DDCRMODE': [],      # VSAM SMB RMODE31 value
+            'DDCDKLBN': []     # DASD key label name
+        }
 
     def parse_t(self):
         """
@@ -345,11 +504,299 @@ class DCOLLECT:
                     self._VRECS['DCVDPTYP'].append(restrec[110:118].decode('cp500').strip())
 
                     self.records_parsed['V'] += 1
+                elif DCURCTYP == 'DC':
+                    # --- Header Information ---
+                    namelen = int(restrec[22:24].hex(), 16)
+                    endp = 24 + namelen
+                    self._DCRECS['DDCNAME'].append(restrec[24:endp].decode('cp500').strip())
+                    self._DCRECS['DDCUSER'].append(restrec[54:62].decode('cp500').strip())
+                    self._DCRECS['DDCDATE'].append(restrec[62:72].decode('cp500').strip())
+                    self._DCRECS['DDCTIME'].append(restrec[74:82].decode('cp500').strip())
+                    self._DCRECS['DDCDESC'].append(restrec[82:202].decode('cp500').strip())
+                    
+                    # --- Specification Flags (DDCSPEC1-DDCSPEC4) ---
+                    ddcspec1 = restrec[202]  # Offset 204
+                    ddcspec2 = restrec[203]  # Offset 205
+                    ddcspec3 = restrec[204]  # Offset 206
+                    ddcspec4 = restrec[205]  # Offset 207
+                    
+                    # DDCSPEC1 flags
+                    self._DCRECS['DDCFRORG'].append(1 if (ddcspec1 & 0b10000000) else 0)
+                    self._DCRECS['DDCFLREC'].append(1 if (ddcspec1 & 0b01000000) else 0)
+                    self._DCRECS['DDCFRFM'].append(1 if (ddcspec1 & 0b00100000) else 0)
+                    self._DCRECS['DDCFKLEN'].append(1 if (ddcspec1 & 0b00010000) else 0)
+                    self._DCRECS['DDCFKOFF'].append(1 if (ddcspec1 & 0b00001000) else 0)
+                    self._DCRECS['DDCFEXP'].append(1 if (ddcspec1 & 0b00000100) else 0)
+                    self._DCRECS['DDCFRET'].append(1 if (ddcspec1 & 0b00000010) else 0)
+                    self._DCRECS['DDCFPSP'].append(1 if (ddcspec1 & 0b00000001) else 0)
+                    
+                    # DDCSPEC2 flags
+                    self._DCRECS['DDCFSSP'].append(1 if (ddcspec2 & 0b10000000) else 0)
+                    self._DCRECS['DDCFDIR'].append(1 if (ddcspec2 & 0b01000000) else 0)
+                    self._DCRECS['DDCFAUN'].append(1 if (ddcspec2 & 0b00100000) else 0)
+                    self._DCRECS['DDCFAVR'].append(1 if (ddcspec2 & 0b00010000) else 0)
+                    self._DCRECS['DDCFVOL'].append(1 if (ddcspec2 & 0b00001000) else 0)
+                    self._DCRECS['DDCFCIS'].append(1 if (ddcspec2 & 0b00000100) else 0)
+                    self._DCRECS['DDCFCIF'].append(1 if (ddcspec2 & 0b00000010) else 0)
+                    self._DCRECS['DDCFCAF'].append(1 if (ddcspec2 & 0b00000001) else 0)
+                    
+                    # DDCSPEC3 flags
+                    self._DCRECS['DDCFXREG'].append(1 if (ddcspec3 & 0b10000000) else 0)
+                    self._DCRECS['DDCFXSYS'].append(1 if (ddcspec3 & 0b01000000) else 0)
+                    self._DCRECS['DDCFIMBD'].append(1 if (ddcspec3 & 0b00100000) else 0)
+                    self._DCRECS['DDCFRPLC'].append(1 if (ddcspec3 & 0b00010000) else 0)
+                    self._DCRECS['DDCFCOMP'].append(1 if (ddcspec3 & 0b00001000) else 0)
+                    self._DCRECS['DDCFMEDI'].append(1 if (ddcspec3 & 0b00000100) else 0)
+                    self._DCRECS['DDCFRECT'].append(1 if (ddcspec3 & 0b00000010) else 0)
+                    self._DCRECS['DDCFVEA'].append(1 if (ddcspec3 & 0b00000001) else 0)
+                    
+                    # DDCSPEC4 flags
+                    self._DCRECS['DDCSPRLF'].append(1 if (ddcspec4 & 0b10000000) else 0)
+                    self._DCRECS['DDCREDUS'].append(1 if (ddcspec4 & 0b01000000) else 0)
+                    self._DCRECS['DDCRABS'].append(1 if (ddcspec4 & 0b00100000) else 0)
+                    self._DCRECS['DDCFCT'].append(1 if (ddcspec4 & 0b00010000) else 0)
+                    self._DCRECS['DDCBLMT'].append(1 if (ddcspec4 & 0b00001000) else 0)
+                    self._DCRECS['DDCCFS'].append(1 if (ddcspec4 & 0b00000100) else 0)
+                    self._DCRECS['DDCDVCS'].append(1 if (ddcspec4 & 0b00000010) else 0)
+                    self._DCRECS['DDCFSCAL'].append(1 if (ddcspec4 & 0b00000001) else 0)
+                    
+                    # --- Data Set Attributes ---
+                    ddcrcorg = int(restrec[206:207].hex(), 16)
+                    rcorgmap = {
+                        0: 'NULL_-SAM',
+                        1: 'VSAM_KSDS',
+                        2: 'VSAM_ESDS',
+                        3: 'VSAM_RRDS',
+                        4: 'VSAM_LDS'
+                    }
+                    self._DCRECS['DDCRCORG'].append(rcorgmap[ddcrcorg])
+                    ddcrecfm = int(restrec[207:208].hex(), 16)
+                    recfmmap = {
+                        0: 'NULL',
+                        1: 'UNDEFINED',
+                        2: 'VARIABLE',
+                        3: 'VARIABLE_SPANNED',
+                        4: 'VARIABLE_BLOCKED',
+                        5: 'VARIABLE_BLOCKED_SPANNED',
+                        6: 'FIXED',
+                        7: 'FIXED_STANDARD',
+                        8: 'FIXED_BLOCKED',
+                        9: 'FIXED_BLOCKED_SPANNED'}
+                    self._DCRECS['DDCRECFM'].append(recfmmap[ddcrecfm])
+                    
+                    ddcdsflg = restrec[208]  # Offset 210
+                    self._DCRECS['DDCBLK'].append(1 if (ddcdsflg & 0b10000000) else 0)
+                    self._DCRECS['DDCSTSP'].append(1 if (ddcdsflg & 0b01000000) else 0)
+                    
+                    self._DCRECS['DDCCNTL'].append(int(restrec[209:210].hex(), 16))
+                    
+                    # Date/Time fields (Alternative interpretations based on which flag is set)
+                    self._DCRECS['DDCRETPD'].append(int(restrec[210:214].hex(), 16))  # Signed 4
+                    self._DCRECS['DDCEXPYR'].append(int(restrec[210:212].hex(), 16))  # Signed 2
+                    self._DCRECS['DDCEXPDY'].append(int(restrec[212:214].hex(), 16))  # Signed 2
+                    self._DCRECS['DDCVOLCT'].append(int(restrec[214:216].hex(), 16))
+                    self._DCRECS['DDCDSNTY'].append(int(restrec[216:218].hex(), 16))
+                    
+                    # --- Space Attributes ---
+                    self._DCRECS['DDCSPPRI'].append(int(restrec[218:222].hex(), 16))
+                    self._DCRECS['DDCSPSEC'].append(int(restrec[222:226].hex(), 16))
+                    self._DCRECS['DDCDIBLK'].append(int(restrec[226:230].hex(), 16))
+                    avrecmap = {
+                        0: "NONE",
+                        1: "BYTES",
+                        2: "KILOBYTES",
+                        3: "MEGABYTES"
+                    }
+                    self._DCRECS['DDCAVREC'].append(avrecmap[int(restrec[230:231].hex(), 16)])
+                    self._DCRECS['DDCREDUC'].append(int(restrec[231:232].hex(), 16))
+                    biasmap = {
+                        0: "USER",
+                        1: "SYSTEM"
+                    }
+                    self._DCRECS['DDCRBIAS'].append(biasmap[int(restrec[232:233].hex(), 16)])
+                    self._DCRECS['DDCDVC'].append(int(restrec[233:234].hex(), 16))
+                    self._DCRECS['DDCAUNIT'].append(int(restrec[234:238].hex(), 16))
+                    self._DCRECS['DDCBSZLM'].append(int(restrec[238:242].hex(), 16))
+                    self._DCRECS['DDCLRECL'].append(int(restrec[242:246].hex(), 16))
+                    
+                    # --- VSAM Attributes ---
+                    self._DCRECS['DDCCISZ'].append(int(restrec[246:250].hex(), 16))
+                    self._DCRECS['DDCCIPCT'].append(int(restrec[250:252].hex(), 16))  # Signed
+                    self._DCRECS['DDCCAPCT'].append(int(restrec[252:254].hex(), 16))  # Signed
+                    self._DCRECS['DDCSHROP'].append(int(restrec[254:256].hex(), 16))  # Signed
+                    self._DCRECS['DDCXREG'].append(int(restrec[254:255].hex(), 16))
+                    self._DCRECS['DDCXSYS'].append(int(restrec[255:256].hex(), 16))
+                    
+                    ddcvindx = restrec[256]  # Offset 258
+                    self._DCRECS['DDCIMBED'].append(1 if (ddcvindx & 0b10000000) else 0)
+                    self._DCRECS['DDCREPLC'].append(1 if (ddcvindx & 0b01000000) else 0)
+                    
+                    self._DCRECS['DDCKLEN'].append(int(restrec[257:258].hex(), 16))
+                    self._DCRECS['DDCKOFF'].append(int(restrec[258:260].hex(), 16))
+                    self._DCRECS['DDCCAMT'].append(int(restrec[260:261].hex(), 16))
+                    
+                    # --- Mountable Device Attributes ---
+                    compmap = {
+                        0: "DDCCNUL",
+                        1: "DDCNOCMP",
+                        2: "DDCIDRC"
+                    }
+                    self._DCRECS['DDCCOMP'].append(compmap[int(restrec[262:263].hex(), 16)])
+                    mediamap = {
+                        0: "NULL",
+                        1: "CARTRIDGE_SYSTEM",
+                        2: "ENHANCHED_CAPACITY_CARTTIDGE_SYSTEM",
+                        3: "HIGH_PERMFORMANCE",
+                        4: "RESERVED_EXTENDED_HIGH"
+                    }
+                    self._DCRECS['DDCMEDIA'].append(mediamap[int(restrec[263:264].hex(), 16)])
+                    rectemap = {
+                        0: "NULL",
+                        1: "18-TRACK",
+                        2: "36-TRACK"
+                    }
+                    self._DCRECS['DDCRECTE'].append(rectemap[int(restrec[264:265].hex(), 16)])
+                    # Offset 265 reserved
+                    
+                    # --- Record Sharing & Logging (DDCRLS1) ---
+                    bwotpmap = {
+                        0: "0",
+                        1: "CICS",
+                        2: "NONE",
+                        3: "IMS"
+                    }
+                    self._DCRECS['DDCBWOTP'].append(bwotpmap[int(restrec[266:267].hex(), 16)])
+                    logrcmap = {
+                        0: "0",
+                        1: "NON-RECOVERABLE_SPHERE",
+                        2: "UNDO_USE_EXERNAL_LOG",
+                        3: "ALL_UNDO_AND_FORWARD"
+                    }
+                    self._DCRECS['DDCLOGRC'].append(logrcmap[int(restrec[267:268].hex(), 16)])
+                    spandmap = {
+                        0: "RECORD_CANNOT_SPAN_CI",
+                        1: "RECORD_MAY_SPAN_CI"
+                    }
+                    self._DCRECS['DDCSPAND'].append(spandmap[int(restrec[268:269].hex(), 16)])
+                    frlogmap = {
+                        0: "0",
+                        1: "NONE",
+                        2: "REDO",
+                        3: "UNDO",
+                        6: "ALL"
+                    }
+                    self._DCRECS['DDCFRLOG'].append(frlogmap[int(restrec[269:270].hex(), 16)])
+                    
+                    # Log Stream ID (variable length)
+                    self._DCRECS['DDCLOGLN'].append(int(restrec[270:272].hex(), 16))
+                    self._DCRECS['DDCLOGID'].append(restrec[272:298].decode('cp500').strip())
+                    
+                    # --- Extended Specification Flags (DDCSPECX) ---
+                    ddcspecx = restrec[298]   # Offset 300
+                    ddcspecb = restrec[299]   # Offset 301
+                    ddcspecc = restrec[300]   # Offset 302
+                    
+                    self._DCRECS['DDCBWOS'].append(1 if (ddcspecx & 0b10000000) else 0)
+                    self._DCRECS['DDCLOGRS'].append(1 if (ddcspecx & 0b01000000) else 0)
+                    self._DCRECS['DDCSPANS'].append(1 if (ddcspecx & 0b00100000) else 0)
+                    self._DCRECS['DDCLSIDS'].append(1 if (ddcspecx & 0b00010000) else 0)
+                    self._DCRECS['DDCFRLGS'].append(1 if (ddcspecx & 0b00001000) else 0)
+                    self._DCRECS['DDCFEXTC'].append(1 if (ddcspecx & 0b00000100) else 0)
+                    self._DCRECS['DDCFA2GB'].append(1 if (ddcspecx & 0b00000010) else 0)
+                    self._DCRECS['DDCFPSEG'].append(1 if (ddcspecx & 0b00000001) else 0)
+                    
+                    # DDCSPECB flags
+                    self._DCRECS['DDCFKYL1'].append(1 if (ddcspecb & 0b10000000) else 0)
+                    self._DCRECS['DDCFKYC1'].append(1 if (ddcspecb & 0b01000000) else 0)
+                    self._DCRECS['DDCFKYL2'].append(1 if (ddcspecb & 0b00100000) else 0)
+                    self._DCRECS['DDCFKYC2'].append(1 if (ddcspecb & 0b00010000) else 0)
+                    self._DCRECS['DDCFVSP'].append(1 if (ddcspecb & 0b00001000) else 0)
+                    self._DCRECS['DDCFSDB'].append(1 if (ddcspecb & 0b00000100) else 0)
+                    self._DCRECS['DDCFOVRD'].append(1 if (ddcspecb & 0b00000010) else 0)
+                    self._DCRECS['DDCFCAR'].append(1 if (ddcspecb & 0b00000001) else 0)
+                    
+                    # DDCSPECC flags
+                    self._DCRECS['DDCFATTR'].append(1 if (ddcspecc & 0b10000000) else 0)
+                    self._DCRECS['DDCFLOGR'].append(1 if (ddcspecc & 0b01000000) else 0)
+                    self._DCRECS['DDCFRMOD'].append(1 if (ddcspecc & 0b00100000) else 0)
+                    self._DCRECS['DDCGSRDU'].append(1 if (ddcspecc & 0b00010000) else 0)
+                    self._DCRECS['DDCFKLBL'].append(1 if (ddcspecc & 0b00001000) else 0)
+                    
+                    # --- More VSAM/Extended Attributes ---
+                    ddcvsam1 = restrec[303]   # Offset 305 (DDCVBYT1)
+                    self._DCRECS['DDCREUSE'].append(1 if (ddcvsam1 & 0b10000000) else 0)
+                    self._DCRECS['DDCSPEED'].append(1 if (ddcvsam1 & 0b01000000) else 0)
+                    self._DCRECS['DDCEX255'].append(1 if (ddcvsam1 & 0b00100000) else 0)
+                    self._DCRECS['DDCLOGRP'].append(1 if (ddcvsam1 & 0b00010000) else 0)
+                    
+                    # Offsets 306-308 reserved (3 bytes)
+                    self._DCRECS['DDCEATTR'].append(int(restrec[307:308].hex(), 16))
+                    ctmap = {
+                        0: "GENERIC",
+                        1: "TAILORED",
+                        2: "ZR",
+                        3: "ZR"
+                    }
+                    self._DCRECS['DDCCT'].append(ctmap[int(restrec[308:309].hex(), 16)])
+                    dscfmap = {
+                        0: "ALL",
+                        1: "UPDATEDONLY",
+                        2: "NONE"
+                    }
+                    self._DCRECS['DDCDSCF'].append(dscfmap[int(restrec[309:310].hex(), 16)])
+                    
+                    ddcrbyte = restrec[310]   # Offset 312
+                    self._DCRECS['DDCA2GB'].append(1 if (ddcrbyte & 0b01000000) else 0)
+                    self._DCRECS['DDCRECLM'].append(1 if (ddcrbyte & 0b00100000) else 0)
+                    
+                    # DDCBLKLM / DDCBSZLM at offset 317 -> index 315
+                    self._DCRECS['DDCBSZL2'].append(int(restrec[315:319].hex(), 16))
+                    
+                    # --- Tape Attributes ---
+                    self._DCRECS['DDCPSCA'].append(int(restrec[319:320].hex(), 16))
+                    self._DCRECS['DDCPSEG'].append(int(restrec[320:321].hex(), 16))
+                    # Offsets 323-325 reserved (5 bytes total)
+                    
+                    # SMB VSP field
+                    ddcvsp = restrec[326]     # Offset 328
+                    self._DCRECS['DDCVSPUK'].append(1 if (ddcvsp & 0b10000000) else 0)
+                    self._DCRECS['DDCVSPUM'].append(1 if (ddcvsp & 0b01000000) else 0)
+                    self._DCRECS['DDCVSPV'].append(int(restrec[327:330].hex(), 16))
+                    
+                    # --- Key Labels ---
+                    self._DCRECS['DDCKLBL1'].append(int(restrec[330:332].hex(), 16))
+                    self._DCRECS['DDCKLBN1'].append(restrec[332:396].decode('cp500').strip())
+                    self._DCRECS['DDCKYCD1'].append(int(restrec[396:397].hex(), 16))
+                    # Offset 397 filler
+                    
+                    self._DCRECS['DDCKLBL2'].append(int(restrec[398:400].hex(), 16))
+                    self._DCRECS['DDCKLBN2'].append(restrec[400:464].decode('cp500').strip())
+                    self._DCRECS['DDCKYCD2'].append(int(restrec[464:465].hex(), 16))
+                    # Offset 465 filler, 466 reserved
+                    rmodemap = {
+                        0: "BLANK",
+                        1: "ALL",
+                        2: "BUFF",
+                        3: "CB",
+                        4: "NONE"
+                    }
+                    self._DCRECS['DDCRMODE'].append(rmodemap[int(restrec[467:468].hex(), 16)])
+                    
+                    # DASD Data Set Key Label
+                    labellen = int(restrec[468:470].hex(), 16)
+                    endlab = 470 + labellen
+                    self._DCRECS['DDCDKLBN'].append(restrec[470:endlab].decode('cp500').strip())
+                    
+                    # Offsets 536-563 reserved (28 bytes)
+                    
+                    self.records_parsed['DC'] += 1
 
             self.drecs = pd.DataFrame.from_dict(self._DRECS)
             del self._DRECS
             self.vrecs = pd.DataFrame.from_dict(self._VRECS)
             del self._VRECS
+            self.dcrecs = pd.DataFrame.from_dict(self._DCRECS)
+            del self._DCRECS
             self._state = self.STATE_READY
 
     def parse(self):
@@ -478,8 +925,14 @@ class DCOLLECT:
         else:
             return self.vrecs
         
+    @property
+    def dataclasses(self):
+        if self._state != self.STATE_READY:
+            print('Not done parsing yet')
+        else:
+            return self.dcrecs
 
-    def datsets_on_volume(self, volser=None):
+    def datasets_on_volume(self, volser=None):
         """
         Returns a sorted list of all datasets on a volume.
 
