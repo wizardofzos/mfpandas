@@ -509,6 +509,89 @@ class IRRDBU00:
         best_match = max(matches, key=lambda x: x[1])
         return self.dataset(profile=best_match[0])
 
+    def userscope(self,userid,without_groups=[]):
+            """Returns a dictionary, key=PROFILECLASS with list of [PROFILENAME, CURRENT_ACCESS] for the user. Access is checked on direct
+            permit or access for any of the connected groups for the user.
+            Optionally a 'without_groups' can be specified to simululate group disconnects.
+            Args:
+                userid (str): The userid we want to simulate for
+                without_groups (list, optional): Access simulation without these groups. Defaults to [].
+            Returns:
+                dict: Scope dictionary keyed on profileclass with a list of [PROFILENAME, CURRENT_ACCESS]
+            """
+            usergroups = self.connectData.loc[self.connectData.USCON_NAME==userid]['USCON_GRP_ID'].values 
+            checkgroups = [x for x in usergroups if x not in without_groups]
+            checkauths = checkgroups + [userid]
+            
+            scope = {}
+            scope['DATASET'] = []
+            dsacc = self.datasetAccess.loc[self.datasetAccess.DSACC_AUTH_ID.isin(checkauths)][['DSACC_NAME', 'DSACC_ACCESS']].values
+            for ds in dsacc:
+                scope['DATASET'].append([ds[0],ds[1]])
+            gracc = self.generalAccess.loc[self.generalAccess.GRACC_AUTH_ID.isin(checkauths)][['GRACC_CLASS_NAME','GRACC_NAME','GRACC_ACCESS']].values
+            for gs in gracc:
+                cname = gs[0]
+                pname = gs[1]
+                access = gs[2]
+                if cname not in scope:
+                    scope[cname] = []
+                scope[cname].append([pname,access])
+            return scope
+
+    def whatif(self, userid,without_groups=[]):
+        """Simulates group removal from user to see what access is lost
+        Args:
+            userid (str): The userid we want to simulate for
+            without_groups (list, optional): Access simulation without these groups. Defaults to [].
+        Returns:
+            DataFrame: Panda dataframe with columns:
+                    profileclass: The profileclass
+                    profile:      The name of the profile 
+                    current:      Current Access
+                    whatif:       Simulated Acccess if user no longer connected to 'without_groups' 
+        """
+        stdacc = self.userscope(userid)
+        whatif = self.userscope(userid,without_groups=without_groups)
+        result = {
+        'profileclass': [],
+        'profile': [],
+        'current': [],
+        'whatif': []
+        }
+        for profileclass, entries in stdacc.items():
+            # Turn what-if entries into a lookup dict for fast access
+            whatif_lookup = {
+                profile: access
+                for profile, access in whatif.get(profileclass, [])
+            }
+            for profile, current_access in entries:
+                result['profileclass'].append(profileclass)
+                result['profile'].append(profile)
+                result['current'].append(current_access)
+                result['whatif'].append(
+                    whatif_lookup.get(profile, "")    # EMPTY IF NO ACCESS IN WHATIF SITUATION
+                )
+        
+        df = pd.DataFrame.from_dict(result)
+        return df 
+
+    def lostaccess(self, userid, without_groups=[]):
+        """Returns a dataframe with all access lost if user would be removed from groups in without_groups
+        Args:
+            userid (str): The userid we want to simulate for
+            without_groups (list, optional): Access simulation without these groups. Defaults to [].
+        Returns:
+            DataFrame: Panda dataframe with columns:
+                    profileclass: The profileclass
+                    profile:      The name of the profile 
+                    lost:         Lost access  if user no longer connected to 'without_groups' 
+        """
+        df = self.whatif(userid, without_groups)
+        lost = df.loc[df.whatif==""][['profileclass', 'profile', 'current']]
+        lost.rename(columns={'current': 'lost'}, inplace=True)
+        return lost 
+    
+
     # start of custom preselected dataframes.
     @property
     def specials(self):
