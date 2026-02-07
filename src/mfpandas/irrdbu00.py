@@ -513,11 +513,30 @@ class IRRDBU00:
             """Returns a dictionary, key=PROFILECLASS with list of [PROFILENAME, CURRENT_ACCESS] for the user. Access is checked on direct
             permit or access for any of the connected groups for the user.
             Optionally a 'without_groups' can be specified to simululate group disconnects.
-            Args:
-                userid (str): The userid we want to simulate for
-                without_groups (list, optional): Access simulation without these groups. Defaults to [].
-            Returns:
-                dict: Scope dictionary keyed on profileclass with a list of [PROFILENAME, CURRENT_ACCESS]
+            Returns a dictionary like:
+
+            ::
+            
+                {
+                    'DATASET': [
+                        ['SYS1.PARMLIB', 'READ'],
+                        ['SYS1.PROCLIB', 'ALTER']
+                    ],
+                    'PROGRAM': [
+                        ['ALU', 'READ']
+                    ]
+                }
+            
+            
+
+            :param userid: Userid/account to analyse
+            :type userid: str
+            :param without_groups: List of groupnames to ignore when calculating user permits. (optional)
+            :type without_groups: list
+
+            :returns: access dictionary
+            :rtype: dict
+
             """
             usergroups = self.connectData.loc[self.connectData.USCON_NAME==userid]['USCON_GRP_ID'].values 
             checkgroups = [x for x in usergroups if x not in without_groups]
@@ -539,16 +558,24 @@ class IRRDBU00:
             return scope
 
     def whatif(self, userid,without_groups=[]):
-        """Simulates group removal from user to see what access is lost
-        Args:
-            userid (str): The userid we want to simulate for
-            without_groups (list, optional): Access simulation without these groups. Defaults to [].
-        Returns:
-            DataFrame: Panda dataframe with columns:
-                    profileclass: The profileclass
-                    profile:      The name of the profile 
-                    current:      Current Access
-                    whatif:       Simulated Acccess if user no longer connected to 'without_groups' 
+        """Simulates group removal from user to see what access is lost. 
+        Returns a dataframe like:
+
+        ::
+
+            profileclass  profile              current  whatif 
+            ------------  -------------------  -------  ------
+            DATASET       SYS1.PARMLIB         READ      
+            DATASET       SYS1.PROCLB          ALTER    ALTER
+            PROGRAM       ALU                  READ     
+
+        :param userid: Userid/account to analyse
+        :type userid: str
+        :param without_groups: List of groupnames to ignore when calculating user permits. (optional)
+        :type without_groups: list
+
+        :returns: Panda Dataframe with current access and whatif access
+        :rtype: DataFrame
         """
         stdacc = self.userscope(userid)
         whatif = self.userscope(userid,without_groups=without_groups)
@@ -576,16 +603,25 @@ class IRRDBU00:
         return df 
 
     def lostaccess(self, userid, without_groups=[]):
-        """Returns a dataframe with all access lost if user would be removed from groups in without_groups
-        Args:
-            userid (str): The userid we want to simulate for
-            without_groups (list, optional): Access simulation without these groups. Defaults to [].
-        Returns:
-            DataFrame: Panda dataframe with columns:
-                    profileclass: The profileclass
-                    profile:      The name of the profile 
-                    lost:         Lost access  if user no longer connected to 'without_groups' 
+        """Returns a DataFrame with user access after removing group connects.. 
+        Returns a dataframe like:
+
+        ::
+
+            profileclass  profile              lost  
+            ------------  -------------------  ----- 
+            DATASET       SYS1.PARMLIB         READ      
+            PROGRAM       ALU                  READ     
+
+        :param userid: Userid/account to analyse
+        :type userid: str
+        :param without_groups: List of groupnames to ignore when calculating user permits. (optional)
+        :type without_groups: list
+
+        :returns: Panda Dataframe with lost access
+        :rtype: DataFrame
         """
+
         df = self.whatif(userid, without_groups)
         lost = df.loc[df.whatif==""][['profileclass', 'profile', 'current']]
         lost.rename(columns={'current': 'lost'}, inplace=True)
