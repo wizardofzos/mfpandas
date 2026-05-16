@@ -886,8 +886,34 @@ class IRRDBU00:
                             value = shared_strings[centry.string]
                             worksheet.write(j, i, value, accessLevelFormats[value])
 
-        writer.close()   
-   
+        writer.close()
+
+    def to_bloodhound(self, apf_libs=None, parmlib_datasets=None, proclib_datasets=None):
+        """Export to BloodHound OpenGraph JSON. Requires mfpandas-racfhound.
+
+        :param apf_libs: set of APF library DSNs (uppercase)
+        :param parmlib_datasets: set of PARMLIB dataset DSNs (uppercase)
+        :param proclib_datasets: set of PROCLIB dataset DSNs (uppercase)
+        :return: dict with shape {"graph": {"nodes": [...], "edges": [...]}}
+        :raises ImportError: If mfpandas-racfhound is not installed.
+        :raises StoopidException: If not done parsing yet.
+        """
+        if self._state != self.STATE_READY:
+            raise StoopidException('Not done parsing yet! (PEBKAM/ID-10T error)')
+        try:
+            from mfpandas_racfhound import to_bloodhound
+        except ImportError:
+            raise ImportError(
+                "mfpandas-racfhound is required for BloodHound export. "
+                "Install it with: pip install mfpandas-racfhound"
+            )
+        return to_bloodhound(
+            self,
+            apf_libs=apf_libs,
+            parmlib_datasets=parmlib_datasets,
+            proclib_datasets=proclib_datasets,
+        )
+
     # endf of custom dataframes and functions
 
     # start of standard dataframes (1-on-1 recordtypes as dataframe) generated via genProps.py
