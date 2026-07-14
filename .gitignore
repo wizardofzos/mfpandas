@@ -1,3 +1,5 @@
 docs/_build/*
-src/mfpandas/__pycache__/*
-src/mfpandas/mfpandas.egg-info/*
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
