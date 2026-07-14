@@ -53,16 +53,15 @@ class DCOLLECT:
     STATE_PARSING     =  1
     STATE_READY       =  2
 
-    # Counters
-    records_seen = {}
-    records_parsed = {}
+    # Length of DCUHDR, the header every DCOLLECT record starts with.
+    HEADER_LENGTH     = 24
 
     def __init__(self, dcollect=None):
         """
         Initialize the DCOLLECT class.
         Recordlayout from: https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure
 
-        Recordtypes supported: D (Datasets), V (Volumes), DC (DataClass).
+        Recordtypes supported: D (Datasets), A (VSAM associations), V (Volumes), DC (DataClass).
 
         :param dcollect: Full path to DCOLLECT file
         :type dcollect: str
@@ -81,7 +80,10 @@ class DCOLLECT:
             raise UsageError("No DCOLLECT file specified.")
         self._dcolfile = dcollect
 
-        self._state = self.STATE_INIT 
+        self._state = self.STATE_INIT
+        self._error = None
+        self.records_seen = {}
+        self.records_parsed = {}
 
         self._DRECS = {
             'DCDDSNAM': [],
@@ -135,8 +137,18 @@ class DCOLLECT:
             'DCDATCL': [],
             'DCDSTGCL': [],
             'DCDMGTCL': [],
-            'DCDSTGRP': []
+            'DCDSTGRP': [],
+            'DCDATYPE': [],
+            'DCDAKLBL': []
             }
+        self._ARECS = {
+            'DCADSNAM': [],
+            'DCAASSOC': [],
+            'DCAKSDS': [],
+            'DCAESDS': [],
+            'DCARRDS': [],
+            'DCALDS': []
+        }
         self._VRECS = {
             'DCVVOLSR': [],
             'DCVPERCT': [],
@@ -314,7 +326,18 @@ class DCOLLECT:
             'DDCDKLBN': []     # DASD key label name
         }
 
-    def parse_t(self):
+    @staticmethod
+    def _packed_date(raw):
+        """Return a date for a packed YYYYDDD field, or None when unset/invalid."""
+        value = raw.hex()[:7]
+        if value == '0000000' or value[4:] == '000':
+            return None
+        try:
+            return datetime.datetime.strptime(value, '%Y%j').date()
+        except (TypeError, ValueError):
+            return None
+
+    def _parse_t(self):
         """
         Function to parse the dcollect file.
         This function is called inside a thread via the parse() function.
@@ -329,13 +352,22 @@ class DCOLLECT:
         with open(self._dcolfile, 'rb') as fid:
             self._state = self.STATE_PARSING
             while True:
-                try:
-                    DCULENG = int(fid.read(2).hex(),16)
-                except:
-                    # we must have hit the end of the file :)
+                header = fid.read(2)
+                if not header:
                     break
+                if len(header) != 2:
+                    raise ValueError('Truncated DCOLLECT record-length field')
+                DCULENG = int.from_bytes(header, byteorder='big')
+                # DCULENG covers the whole record, header (DCUHDR) included.
+                if DCULENG < self.HEADER_LENGTH:
+                    raise ValueError(f'Invalid DCOLLECT record length: {DCULENG}')
                 #print('Have a record of',DCULENG,'bytes')
                 restrec = fid.read(DCULENG-2)
+                if len(restrec) != DCULENG - 2:
+                    raise ValueError(
+                        f'Truncated DCOLLECT record: expected {DCULENG - 2} bytes, '
+                        f'got {len(restrec)}'
+                    )
                 DCURCTYP = restrec[2:4].decode('cp500').strip()
                 if DCURCTYP in self.records_seen:
                     self.records_seen[DCURCTYP] += 1
@@ -418,31 +450,10 @@ class DCOLLECT:
                     self._DRECS['DCDBKLNG'].append(int(restrec[82:84].hex(),16))
                     self._DRECS['DCDLRECL'].append(int(restrec[84:86].hex(),16))
 
-                    # formats = yyyydddF
-                    createraw = restrec[102:106].hex()[0:7]
-                    crdte = datetime.datetime.strptime(createraw, '%Y%j').date()
-                    self._DRECS['DCDCREDT'].append(crdte)
-
-                    expraw = restrec[106:110].hex()[0:7]
-                    if expraw == '0000000':
-                        expdte = False
-                    elif expraw[4:] == '000':
-                        expdte = False 
-                    else:
-                        try:
-                            expdte =  datetime.datetime.strptime(expraw, '%Y%j').date()
-                        except:
-                            # https://www.mxg.com/changes/chng0808.asp
-                            expdte = False
-                    
-                    self._DRECS['DCDEXPDT'].append(expdte)
-
-                    lrraw = restrec[110:114].hex()[0:7]
-                    if lrraw == '0000000':
-                        lrdte = False
-                    else:
-                        lrdte = datetime.datetime.strptime(lrraw, '%Y%j').date()
-                    self._DRECS['DCDLSTRF'].append(lrdte)
+                    # Packed dates use yyyydddF; zero and invalid dates are unset.
+                    self._DRECS['DCDCREDT'].append(self._packed_date(restrec[102:106]))
+                    self._DRECS['DCDEXPDT'].append(self._packed_date(restrec[106:110]))
+                    self._DRECS['DCDLSTRF'].append(self._packed_date(restrec[110:114]))
 
 
 
@@ -471,8 +482,31 @@ class DCOLLECT:
                     else:
                         self._DRECS['DCDSTGRP'].append('*NONE*')
 
+                    # DCDAENCR (encryption) was added by APAR OA51067. Older,
+                    # shorter D-records stop before it.
+                    if len(restrec) >= 450:
+                        self._DRECS['DCDATYPE'].append(restrec[384:386].hex().upper())
+                        # Unset key labels are binary zeros, not EBCDIC blanks.
+                        self._DRECS['DCDAKLBL'].append(restrec[386:450].decode('cp500').strip(' \x00'))
+                    else:
+                        self._DRECS['DCDATYPE'].append('')
+                        self._DRECS['DCDAKLBL'].append('')
+
                     
                     self.records_parsed['D'] += 1
+                elif DCURCTYP == 'A':
+                    if len(restrec) < 111:
+                        raise ValueError(
+                            f'Truncated DCOLLECT A-record: {len(restrec) + 2} bytes'
+                        )
+                    DCAFLAG1 = restrec[110]
+                    self._ARECS['DCADSNAM'].append(restrec[22:66].decode('cp500').strip())
+                    self._ARECS['DCAASSOC'].append(restrec[66:110].decode('cp500').strip())
+                    self._ARECS['DCAKSDS'].append((DCAFLAG1 & 0b10000000) != 0)
+                    self._ARECS['DCAESDS'].append((DCAFLAG1 & 0b01000000) != 0)
+                    self._ARECS['DCARRDS'].append((DCAFLAG1 & 0b00100000) != 0)
+                    self._ARECS['DCALDS'].append((DCAFLAG1 & 0b00010000) != 0)
+                    self.records_parsed['A'] += 1
                 elif DCURCTYP == 'V':
                     self._VRECS['DCVVOLSR'].append(restrec[22:28].decode('cp500').strip())
                     self._VRECS['DCVPERCT'].append(int(restrec[33:34].hex(),16))
@@ -793,11 +827,22 @@ class DCOLLECT:
 
             self.drecs = pd.DataFrame.from_dict(self._DRECS)
             del self._DRECS
+            self.arecs = pd.DataFrame.from_dict(self._ARECS)
+            del self._ARECS
             self.vrecs = pd.DataFrame.from_dict(self._VRECS)
             del self._VRECS
             self.dcrecs = pd.DataFrame.from_dict(self._DCRECS)
             del self._DCRECS
             self._state = self.STATE_READY
+
+    def parse_t(self):
+        """Parse synchronously and retain failures for asynchronous callers."""
+        try:
+            self._parse_t()
+        except Exception as exc:
+            self._error = exc
+            self._state = self.STATE_BAD
+        return self._state == self.STATE_READY
 
     def parse(self):
         """
@@ -830,7 +875,7 @@ class DCOLLECT:
             24-06-30 15:07:08 - Done.
             24-06-30 15:07:08   - 37 V-records seen, 37 parsed
             24-06-30 15:07:08   - 6704 D-records seen, 6704 parsed
-            24-06-30 15:07:08   - 1392 A-records seen, 0 parsed
+            24-06-30 15:07:08   - 1392 A-records seen, 1392 parsed
             24-06-30 15:07:08   - 12 DC-records seen, 0 parsed
             24-06-30 15:07:08   - 12 SC-records seen, 0 parsed
             24-06-30 15:07:08   - 2 MC-records seen, 0 parsed
@@ -844,10 +889,12 @@ class DCOLLECT:
         """            
         print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - parsing {self._dcolfile}')
         self.parse()
-        while self._state < self.STATE_READY:
+        while self._state in (self.STATE_INIT, self.STATE_PARSING):
             print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - {self.status["status"]}', end='\r', flush=True)
             time.sleep(0.5)
         print('')
+        if self._state == self.STATE_BAD:
+            raise UsageError(f'DCOLLECT parsing failed: {self._error}')
         print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")} - Done.')
         for t in self.records_parsed:
             print(f'{datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")}   - {self.records_seen[t]} {t}-records seen, {self.records_parsed[t]} parsed')
@@ -900,11 +947,26 @@ class DCOLLECT:
 
 
         """       
+        result = {
+            'records_seen': self.records_seen,
+            'records_parsed': self.records_parsed,
+        }
         if self._state == self.STATE_READY:
-            return {'status': 'Ready', 'records_seen': self.records_seen, 'records_parsed': self.records_parsed}
+            result['status'] = 'Ready'
+        elif self._state == self.STATE_BAD:
+            result['status'] = 'Error'
+            result['error'] = str(self._error)
         else:
-            return {'status': "Still Parsing your input", 'records_seen': self.records_seen, 'records_parsed': self.records_parsed}
+            result['status'] = "Still Parsing your input"
+        return result
         
+    def _require_ready(self):
+        """Raise a UsageError unless parsing completed succesfully."""
+        if self._state == self.STATE_BAD:
+            raise UsageError(f'DCOLLECT parsing failed: {self._error}')
+        if self._state != self.STATE_READY:
+            raise UsageError('Not done parsing yet!')
+
     @property
     def datasets(self):
         """
@@ -912,25 +974,25 @@ class DCOLLECT:
 
 
         For an explanation of the fields go to : https://www.ibm.com/docs/en/zos/3.1.0?topic=output-dcollect-record-structure
-        """              
-        if self._state != self.STATE_READY:
-            print('no can do make nice error')
-        else:
-            return self.drecs
-    
+        """
+        self._require_ready()
+        return self.drecs
+
     @property
     def volumes(self):
-        if self._state != self.STATE_READY:
-            print('error also here')
-        else:
-            return self.vrecs
-        
+        self._require_ready()
+        return self.vrecs
+
     @property
     def dataclasses(self):
-        if self._state != self.STATE_READY:
-            print('Not done parsing yet')
-        else:
-            return self.dcrecs
+        self._require_ready()
+        return self.dcrecs
+
+    @property
+    def associations(self):
+        """Return parsed VSAM base-cluster association (A) records."""
+        self._require_ready()
+        return self.arecs
 
     def datasets_on_volume(self, volser=None):
         """
