@@ -218,7 +218,9 @@ class SETROPTS:
             lists[f] = []
             
         for key in dict:
-            if len(dict[key]) == 1:
+            if key in self._setropts_lists:
+                lists[key] = dict[key]
+            else:
                 options['Setting'].append(key)
                 try:
                     # EPLS convert to int if possible
@@ -227,8 +229,6 @@ class SETROPTS:
                     dict[key][0] = dict[key][0]
                 options['Value'].append(dict[key][0])
                 options['Meaning'].append(self._setropts_fields[key])
-            else:
-                lists[key] = dict[key]
         # Fill not-specified ones
         for f in self._setropts_fields.keys():
             if f not in options['Setting']:
