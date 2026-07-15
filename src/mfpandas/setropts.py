@@ -196,11 +196,44 @@ class SETROPTS:
                     self._finfo = pd.read_pickle(pickle)
 
         
+    @classmethod
+    def from_setropts_list(cls, source):
+        """Build a :py:class:`SETROPTS` from raw ``SETROPTS LIST`` output.
+
+        This is an alternative to the IRRXUTIL REXX (:py:meth:`extractREXX`)
+        front-end. Instead of running the REXX on the mainframe and transferring
+        the ``_SETROPTS`` extract, you can capture ordinary ``SETROPTS LIST``
+        output (from a TSO session or the JES spool) and convert it locally.
+
+        :param source: Path to a file containing ``SETROPTS LIST`` output, or
+            the captured text itself.
+        :type source: str
+        :returns: A parsed :py:class:`SETROPTS` instance.
+
+        ::
+
+            >>> from mfpandas import SETROPTS
+            >>> s = SETROPTS.from_setropts_list('/home/henri/setropts-list.txt')
+            >>> s.classInfo
+        """
+        from .setropts_list import convert
+        if os.path.exists(source):
+            with open(source, 'r') as f:
+                text = f.read()
+        else:
+            text = source
+        obj = cls()
+        obj._build(convert(text))
+        return obj
+
     def _parse(self):
         with open(self._setropts, 'r') as f:
             kvpairs = f.read().splitlines()
+        self._build(kvpairs)
+
+    def _build(self, kvpairs):
         dict = {}
-        
+
         for kv in kvpairs:
             parts = kv.split(':', maxsplit=1)
             key = parts[0].strip()

@@ -7,7 +7,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mfpandas",
-    version="0.1.7",
+    version="0.1.8",
     author="Wizard of z/OS",
     author_email="wizard@zdevops.com",
     description="Parsing various z/OS structures into Panda dataframes.",
@@ -27,6 +27,11 @@ setuptools.setup(
         },
     packages=setuptools.find_packages(where="src"),
     include_package_data=True,
+    entry_points={
+        "console_scripts": [
+            "mfpandas-setropts-list=mfpandas.setropts_list:main",
+        ],
+    },
     install_requires=[
         'wheel',
         'pandas>=1.5.2',
