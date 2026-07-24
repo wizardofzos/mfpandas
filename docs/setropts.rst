@@ -1,10 +1,19 @@
 Working with SETROPTS LIST data
 ###############################
 
-The :py:class:`mfpandas.SETROPTS` is made to work with your SETROPTS data. 
-Because parsing the output of `SETROPTS LIST` is troublesome to say the least a REXX
-is provided to create the SETROPTS export this class can work with.
+The :py:class:`mfpandas.SETROPTS` is made to work with your SETROPTS data.
+There are two ways to feed it:
 
+* **Option A (recommended): the IRRXUTIL REXX.** Run the provided REXX on the
+  mainframe to create a clean ``KEY:VALUE`` extract dataset and transfer it down.
+* **Option B: convert existing ``SETROPTS LIST`` output.** If you already have a
+  ``SETROPTS LIST`` capture (from a TSO session or the JES spool), convert it
+  locally instead of running anything on the mainframe. See
+  :ref:`setropts-list-conversion` below.
+
+
+Option A: the IRRXUTIL REXX
+***************************
 
 This REXX is retrieved from the SETROPTS class like below::
 
@@ -56,6 +65,34 @@ This REXX is retrieved from the SETROPTS class like below::
                                                                 
     say "Done"     
 
+
+
+.. _setropts-list-conversion:
+
+Option B: convert SETROPTS LIST output
+**************************************
+
+If running the REXX is not convenient, you can convert a plain ``SETROPTS LIST``
+capture into the same ``KEY:VALUE`` format. Both a TSO terminal capture and a
+JES/SDSF spool capture (with ASA carriage-control) are handled.
+
+Build a :py:class:`mfpandas.SETROPTS` directly from the captured text or a file::
+
+    >>> from mfpandas import SETROPTS
+    >>> s = SETROPTS.from_setropts_list('/home/henri/setropts-list.txt')
+    >>> s.classInfo
+
+Or convert to a ``KEY:VALUE`` file from the command line, then load it the same
+way as a REXX extract::
+
+    $ mfpandas-setropts-list setropts-list.txt -o WIZARD.SETROPTS.D250101
+    >>> s = SETROPTS('WIZARD.SETROPTS.D250101')
+
+.. note::
+
+   The converter only emits the settings represented by the IRRXUTIL extract, so
+   a few fields available through Option A are not reconstructed from
+   ``SETROPTS LIST`` text. Prefer Option A when you can run the REXX.
 
 
 SETROPTS Examples

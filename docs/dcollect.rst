@@ -15,8 +15,11 @@ For all examples here we're assuming you've already ran the following code::
 
     d = DCOLLECT('/path/to/dcolfile')
     d.parse()
-    while d.status['status'] != 'Ready':
+    while d.status['status'] not in ('Ready', 'Error'):
         time.sleep(1)
+
+    if d.status['status'] == 'Error':
+        raise RuntimeError(d.status['error'])
 
 
 To find all datasets starting with 'SYS1' and the volulme they're on::
@@ -40,6 +43,30 @@ To find all datasets on a volume::
 
     >>> d.datsets_on_volume(volser='A5DBAR')
     ['SYS1.VTOCIX.A5DBAR', 'SYS1.VVDS.VA5DBAR']
+
+
+Missing dates and encryption information
+****************************************
+
+Packed DCOLLECT dates containing zero or invalid values are returned as
+``None`` rather than terminating the background parser. Before 0.1.8 these
+were returned as ``False``, so replace any ``== False`` filters on
+``DCDCREDT``, ``DCDEXPDT`` or ``DCDLSTRF`` with ``.isnull()``.
+
+Dataset records also expose ``DCDATYPE`` and ``DCDAKLBL``. ``DCDATYPE`` is
+``0100`` for AES-256 XTS encryption and ``FFFF`` for an unencrypted data set;
+``DCDAKLBL`` holds the key label and is blank for unencrypted data sets. Both
+are empty for D-records written before APAR OA51067, which are too short to
+contain them.
+
+
+VSAM associations
+*****************
+
+The ``associations`` property exposes parsed type-A records. ``DCADSNAM`` is
+the component data set and ``DCAASSOC`` is its associated base cluster. The
+``DCAKSDS``, ``DCAESDS``, ``DCARRDS``, and ``DCALDS`` Boolean columns describe
+the VSAM organization.
 
 
 
